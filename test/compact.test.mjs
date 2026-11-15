@@ -424,8 +424,8 @@ test('background tiles: own background per segment, no separators, inner resets 
   const out = bgOf('tiles', usage(84, 25), { paths: [{ kind: 'project', name: 'proj', dir: '/p' }, { kind: 'scratch', name: 'sc', dir: '/s' }] });
   const t = (n) => `38;5;255;48;5;${n}`;
   assert.ok(out.startsWith(`${E(t(54))} 🤖 M ${R}${E(t(23))} 🧠 `));
-  assert.ok(out.includes(`${E(t(23))} 🧠 ${E('38;5;114')}▰▰▰▱▱▱▱▱▱▱ 30%${R}${E(t(23))} ${R}`)); // tile SGR re-applied after inner reset
-  assert.ok(out.includes(`${E(t(58))} ⏳ ${E('38;5;245')}5h${R}${E(t(58))} ${E('38;5;214')}84%↑${R}${E(t(58))} 12:00 ${R}`));
+  assert.ok(out.includes(`${E(t(23))} 🧠 ${E('38;5;156')}▰▰▰▱▱▱▱▱▱▱ 30%${R}${E(t(23))} ${R}`)); // tile SGR re-applied after inner reset
+  assert.ok(out.includes(`${E(t(58))} ⏳ ${E('38;5;255')}5h${R}${E(t(58))} ${E('38;5;228')}84%↑${R}${E(t(58))} 12:00 ${R}`));
   assert.ok(out.includes(`${E(t(94))} 📅 `));
   assert.ok(out.endsWith(`${E(t(24))} 🏠 proj ${R}${E(t(236))} 📁 sc ${R}`));
   assert.ok(!strip(out).includes('│'));
@@ -473,6 +473,8 @@ test('background: basic tier uses 16-color codes only', () => {
   const tiles = compact(usage(10, 10), { ...g, contextPct: 30, background: 'tiles' });
   assert.ok(tiles.startsWith(`${E('97;100')} M ${R}${E('97;100')} `));
   const bar = compact(usage(10, 10), { ...g, contextPct: 30, background: 'bar', columns: 60 });
+  const tilesHot = compact(usage(84, 96), { ...g, contextPct: 30, background: 'tiles' });
+  assert.ok(tilesHot.includes(`${E('97')}5h${R}`) && tilesHot.includes(`${E('93')}84%↑${R}`) && tilesHot.includes(`${E('91')}96%↑${R}`) && tilesHot.includes(`${E('92')}`)); // bright pcts, tile-fg label
   assert.ok(bar.startsWith(E('97;100')));
   assert.equal([...strip(bar)].length, 60);
   for (const out of [warn, tiles, bar]) assert.ok(!out.includes('38;5') && !out.includes('48;5'));
@@ -500,4 +502,13 @@ test('background: classic layout is unaffected', () => {
     formatStatusLine(u, 95, ['five_hour', 'seven_day'], { ...base, background: 'tiles', columns: 80 }),
     formatStatusLine(u, 95, ['five_hour', 'seven_day'], base),
   );
+});
+
+test('background tiles: bright colors only in tiles; bar/warn/off keep the normal palette', () => {
+  for (const background of ['off', 'bar', 'warn']) {
+    const out = bgOf(background, usage(10, 10));
+    assert.ok(out.includes(E('38;5;245')) && out.includes(E('38;5;114')) && !out.includes('38;5;156') && !out.includes('38;5;255m5h'), background);
+  }
+  const hot = bgOf('tiles', usage(96, 10), { contextPct: 85 });
+  assert.ok(hot.includes(`${E('38;5;217')}96%↑${R}`) && hot.includes(`${E('38;5;217')}▰▰▰▰▰▰▰▰▰▱ 85%${R}`)); // red inside tiles
 });
