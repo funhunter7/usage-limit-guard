@@ -14,7 +14,8 @@ node "${CLAUDE_PLUGIN_ROOT}/bin/doctor.mjs"
 The command prints a localized report with one line per check: Node version (≥ 18), whether the OAuth
 token is present, whether the status-line is wired, whether the usage cache is fresh, and how the
 installed plugin version compares to the latest GitHub release. A ✅ means the check passed; a ❌ is
-followed by an indented hint on how to fix it. The version line is informational (it never fails when
+followed by an indented hint on how to fix it. In Windows Terminal without `FORCE_HYPERLINK=1` there is also an ℹ️ info line (not a failure): the status line links are hidden; mention that `/limit-guard-setup` can enable them.
+The version line is informational (it never fails when
 the latest release can't be fetched, e.g. offline).
 
 Report the output to the user and, for any ❌, explain the suggested fix in plain Czech.

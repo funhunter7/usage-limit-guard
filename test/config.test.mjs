@@ -407,3 +407,47 @@ test('loadConfig: project watch csv string is coerced to a valid array', () => {
   const readFile = () => JSON.stringify({ watch: 'five_hour, seven_day_opus' });
   assert.deepEqual(loadConfig('/proj', readFile, {}).watch, ['five_hour', 'seven_day_opus']);
 });
+
+// --- v0.13 compact layout options ---
+
+test('loadConfig: compact-layout options default on / compact / all', () => {
+  const readThrows = () => { throw new Error('ENOENT'); };
+  const cfg = loadConfig('/proj', readThrows, noEnv);
+  assert.equal(cfg.layout, 'compact');
+  assert.equal(cfg.windowDisplay, 'all');
+  assert.equal(cfg.scratchDir, '');
+  for (const k of ['showModel', 'showContext', 'paceArrow', 'showPaths']) assert.equal(cfg[k], true, k);
+});
+
+test('loadConfig: reads new options from env (string booleans) and accepts style basic', () => {
+  const readThrows = () => { throw new Error('ENOENT'); };
+  const cfg = loadConfig('/proj', readThrows, {
+    CLAUDE_PLUGIN_OPTION_LAYOUT: 'classic', CLAUDE_PLUGIN_OPTION_WINDOW_DISPLAY: 'nearest',
+    CLAUDE_PLUGIN_OPTION_SHOW_MODEL: 'false', CLAUDE_PLUGIN_OPTION_PACE_ARROW: 'off',
+    CLAUDE_PLUGIN_OPTION_SCRATCH_DIR: ' notes ', CLAUDE_PLUGIN_OPTION_STYLE: 'basic',
+  });
+  assert.equal(cfg.layout, 'classic');
+  assert.equal(cfg.windowDisplay, 'nearest');
+  assert.equal(cfg.showModel, false);
+  assert.equal(cfg.paceArrow, false);
+  assert.equal(cfg.showContext, true);
+  assert.equal(cfg.scratchDir, 'notes');
+  assert.equal(cfg.style, 'basic');
+});
+
+test('loadConfig: project file overrides; invalid new values fall back to defaults', () => {
+  const readFile = () => JSON.stringify({ layout: 'weird', windowDisplay: 'x', showPaths: 'nope', showModel: false, scratchDir: 5 });
+  const cfg = loadConfig('/proj', readFile, noEnv);
+  assert.equal(cfg.layout, 'compact');
+  assert.equal(cfg.windowDisplay, 'all');
+  assert.equal(cfg.showPaths, true);
+  assert.equal(cfg.showModel, false);
+  assert.equal(cfg.scratchDir, '');
+});
+
+test('loadConfig: barStyle defaults to pill, reads env, invalid falls back', () => {
+  const readThrows = () => { throw new Error('ENOENT'); };
+  assert.equal(loadConfig('/proj', readThrows, noEnv).barStyle, 'pill');
+  assert.equal(loadConfig('/proj', readThrows, { CLAUDE_PLUGIN_OPTION_BAR_STYLE: 'smooth' }).barStyle, 'smooth');
+  assert.equal(loadConfig('/proj', () => JSON.stringify({ barStyle: 'zigzag' }), noEnv).barStyle, 'pill');
+});

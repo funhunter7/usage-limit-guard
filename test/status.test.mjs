@@ -193,3 +193,24 @@ test('renderStatus (en): no history -> no-data wording', () => {
   );
   assert.match(out, /history.*no data/i);
 });
+
+test('renderStatus: shows the v0.13 compact-layout options', () => {
+  const out = renderStatus(
+    { threshold: 90, watch: ['five_hour'], locale: 'en-US', layout: 'compact', windowDisplay: 'nearest',
+      showModel: true, showContext: false, paceArrow: true, showPaths: false, scratchDir: '', barStyle: 'dot' },
+    { tokenPresent: true, cacheAgeMs: null, statusLineWired: true },
+  );
+  assert.match(out, /layout.*compact/);
+  assert.match(out, /windowDisplay.*nearest/);
+  assert.match(out, /showContext.*false/);
+  assert.match(out, /scratchDir.*-/);
+  assert.match(out, /barStyle.*dot/);
+});
+
+test('renderStatus: shows legend mode on/off', () => {
+  const cfg = { threshold: 90, watch: ['five_hour'], locale: 'en-US' };
+  const base = { tokenPresent: true, cacheAgeMs: null, statusLineWired: false };
+  assert.match(renderStatus(cfg, { ...base, legendOn: true }), /legend:\s*on/);
+  assert.match(renderStatus(cfg, base), /legend:\s*off/);
+  assert.doesNotMatch(renderStatus(cfg, base), /helpLinks/);
+});

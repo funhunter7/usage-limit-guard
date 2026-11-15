@@ -1,6 +1,6 @@
 {
   "name": "claude-limit-guard",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Watches Claude subscription usage limits; shows them in the status line, injects them into context, and gracefully saves/resumes work at a configurable threshold.",
   "author": { "name": "funhunter7" },
   "userConfig": {
@@ -61,6 +61,54 @@
       "title": "Burn-rate projection",
       "description": "Show a projected time-to-threshold segment (e.g. '📈 ~1h40m to 90%') based on recent usage trend: off or on (default off).",
       "default": "off"
+    },
+    "layout": {
+      "type": "string",
+      "title": "Status line layout",
+      "description": "compact (model, context bar, limit windows, project paths) or classic (the v0.12 limits-only line). Default compact.",
+      "default": "compact"
+    },
+    "show_model": {
+      "type": "boolean",
+      "title": "Show model",
+      "description": "Show the active model name in the compact status line (default on).",
+      "default": true
+    },
+    "show_context": {
+      "type": "boolean",
+      "title": "Show context bar",
+      "description": "Show a context-window usage bar in the compact status line (default on).",
+      "default": true
+    },
+    "pace_arrow": {
+      "type": "boolean",
+      "title": "Pace arrow",
+      "description": "Show an up arrow after a window's percentage when usage runs ahead of elapsed window time (default on).",
+      "default": true
+    },
+    "bar_style": {
+      "type": "string",
+      "title": "Context bar style",
+      "description": "Glyphs of the context bar: pill, block, shade, square, dot, rect, line, braille or smooth. Default pill (falls back to block in terminals without the glyphs).",
+      "default": "pill"
+    },
+    "window_display": {
+      "type": "string",
+      "title": "Window display",
+      "description": "all (every watched window) or nearest (only the window closest to its threshold). Default all.",
+      "default": "all"
+    },
+    "show_paths": {
+      "type": "boolean",
+      "title": "Show project paths",
+      "description": "Show project, worktree and scratch folder segments (clickable where the terminal supports it). Default on.",
+      "default": true
+    },
+    "scratch_dir": {
+      "type": "string",
+      "title": "Scratch folder",
+      "description": "Folder shown as the scratch segment (relative to the project). Leave empty for Claude Code's built-in scratchpad.",
+      "default": ""
     },
     "notifications": {
       "type": "string",

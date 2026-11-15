@@ -6,9 +6,11 @@ import { getUsage as defaultGetUsage, CACHE_PATH } from '../lib/usage.mjs';
 import { writeCache as defaultWriteCache } from '../lib/cache.mjs';
 import { appendReading as defaultAppendReading, readHistory as defaultReadHistory, projectMinutesToThreshold, HISTORY_PATH, HISTORY_MIN_INTERVAL_MS } from '../lib/history.mjs';
 import { appendUsage as defaultAppendUsage, USAGE_LOG_PATH } from '../lib/usageLog.mjs';
-import { coversWatched, usageFromRateLimits, watchedExpired } from '../lib/stdinUsage.mjs';
+import { coversWatched, fieldsFromPayload, usageFromRateLimits, watchedExpired } from '../lib/stdinUsage.mjs';
+import { buildPaths as defaultBuildPaths } from '../lib/statusPaths.mjs';
+import { makeDebug } from '../lib/debug.mjs';
 import { resolveWatch, watchBase } from '../lib/watch.mjs';
-import { formatStatusLine, resolveHour12, resolveStyle, resolveLocale } from '../lib/format.mjs';
+import { formatStatusLine, resolveHour12, resolveStyle, resolveTier, resolveLocale } from '../lib/format.mjs';
 import { breachedLimits, warnedLimits } from '../lib/threshold.mjs';
 import { getMessages } from '../lib/messages.mjs';
 import { shouldBlockStop as defaultShouldBlockStop } from '../lib/stopGuard.mjs';
@@ -36,6 +38,13 @@ export async function runCli(mode, cwd, deps = {}) {
     appendUsage = defaultAppendUsage,
     usageLogPath = USAGE_LOG_PATH,
     snoozeUntil = defaultSnoozeUntil,
+    // Statusline-only extras: fieldsFromPayload output (model, context %, workspace, ...),
+    // plus the env and tmp dir used for terminal-tier detection and scratch lookup.
+    payload = null,
+    env = process.env,
+    tmp = undefined,
+    buildPaths = defaultBuildPaths,
+    debug = makeDebug(env),
   } = deps;
 
   const cfg = loadConfig(cwd);
@@ -82,6 +91,10 @@ export async function runCli(mode, cwd, deps = {}) {
   // With live usage known, resolve the effective windows ('auto' adds any per-model weekly
   // window in use). Every consumer below uses `watch`, not cfg.watch.
   const watch = resolveWatch(usage, cfg.watch);
+  // The compact layout is statusline-only; --context/--stop keep the classic line unchanged.
+  const compact = mode === '--statusline' && cfg.layout === 'compact';
+  // The tier drives only the compact segments; fallback/projection glyphs follow resolveStyle as before.
+  const tier = compact ? resolveTier(cfg.style, env, process.platform, cfg.barStyle) : null;
   const glyphs = resolveStyle(cfg.style);
   const hour12 = resolveHour12(cfg.timeFormat);
   // When snoozed (/limit-guard-snooze), suppress the guard/context directives until the
@@ -127,7 +140,25 @@ export async function runCli(mode, cwd, deps = {}) {
     }
   }
 
-  const line = formatStatusLine(usage, cfg.threshold, watch, { now: nowDate, locale, hour12, glyphs, warnBand: cfg.warnBand, labelStyle: cfg.labelStyle, resetDisplay: cfg.resetDisplay, thresholdOverrides: overrides, projectionDisplay: cfg.projectionDisplay, projection });
+  const lineOpts = { now: nowDate, locale, hour12, glyphs, warnBand: cfg.warnBand, labelStyle: cfg.labelStyle, resetDisplay: cfg.resetDisplay, thresholdOverrides: overrides, projectionDisplay: cfg.projectionDisplay, projection };
+  let line;
+  if (compact) {
+    try {
+      const f = { ...fieldsFromPayload(null), ...payload };
+      f.currentDir = f.currentDir || cwd;
+      line = formatStatusLine(usage, cfg.threshold, watch, {
+        ...lineOpts, layout: 'compact', tier, model: f.model, contextPct: f.contextPct,
+        showModel: cfg.showModel, showContext: cfg.showContext, paceArrow: cfg.paceArrow,
+        windowDisplay: cfg.windowDisplay, showPaths: cfg.showPaths,
+        paths: cfg.showPaths ? buildPaths(f, { scratchDir: cfg.scratchDir, tmp }) : [],
+      });
+    } catch (e) {
+      debug('compact status line failed, falling back to classic:', String(e?.message ?? e));
+      line = formatStatusLine(usage, cfg.threshold, watch, lineOpts); // never throw from the status line
+    }
+  } else {
+    line = formatStatusLine(usage, cfg.threshold, watch, lineOpts);
+  }
 
   if (mode === '--statusline') {
     // Fire a desktop notification once per crossing (keyed cwd|window|resets_at|band) when
@@ -218,21 +249,31 @@ export function parseCwd(raw, fallback) {
   return parseStdin(raw, fallback).cwd;
 }
 
+// Parse the display fields (model, context %, dirs) from the raw stdin payload; never throws.
+export function parseFields(raw) {
+  try {
+    return fieldsFromPayload(JSON.parse(raw));
+  } catch {
+    return fieldsFromPayload(null);
+  }
+}
+
 // ---- real entrypoint (the fd-0 read itself is not exercised by unit tests) ----
 function readStdin() {
-  if (process.stdin.isTTY) return { cwd: process.cwd(), rateLimits: undefined };
+  if (process.stdin.isTTY) return { cwd: process.cwd(), rateLimits: undefined, payload: null };
   try {
-    return parseStdin(readFileSync(0, 'utf8'), process.cwd()); // fd 0 = stdin
+    const raw = readFileSync(0, 'utf8'); // fd 0 = stdin
+    return { ...parseStdin(raw, process.cwd()), payload: parseFields(raw) };
   } catch {
-    return { cwd: process.cwd(), rateLimits: undefined };
+    return { cwd: process.cwd(), rateLimits: undefined, payload: null };
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const mode = process.argv[2] || '--statusline';
-  const { cwd, rateLimits } = readStdin();
+  const { cwd, rateLimits, payload } = readStdin();
   const stdinUsage = usageFromRateLimits(rateLimits);
-  runCli(mode, cwd, { stdinUsage })
+  runCli(mode, cwd, { stdinUsage, payload })
     .then((out) => process.stdout.write(out))
     .catch(() => process.stdout.write(mode === '--statusline' ? 'limit ?' : '{}'));
 }

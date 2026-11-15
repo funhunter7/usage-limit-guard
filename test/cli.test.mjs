@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runCli, parseCwd, parseStdin } from '../bin/usage.mjs';
+import { runCli, parseCwd, parseFields, parseStdin } from '../bin/usage.mjs';
 
 test('parseCwd: workspace.current_dir wins over cwd', () => {
   const raw = JSON.stringify({ workspace: { current_dir: '/ws' }, cwd: '/other' });
@@ -418,4 +418,70 @@ test('--stop: auto does NOT breach on an unused per-model window (utilization 0)
                    seven_day_opus: { utilization: 0, resets_at: '2026-06-03T10:00:00+02:00' } };
   const out = JSON.parse(await runCli('--stop', '/proj', deps(unused, { watch: 'auto', threshold: 90, handoffExists: false })));
   assert.deepEqual(out, {});
+});
+
+// --- v0.13 compact layout wiring ---
+
+const compactDeps = (extra = {}) => {
+  const d = deps(SAMPLE, { stdinUsage: SAMPLE });
+  const base = d.loadConfig();
+  d.loadConfig = () => ({ ...base, layout: 'compact', showModel: true, showContext: true, paceArrow: true,
+    windowDisplay: 'all', showPaths: true, scratchDir: '', ...extra.cfg });
+  d.env = { WT_SESSION: 'x', FORCE_HYPERLINK: '0', NO_COLOR: '1' };
+  d.tmp = '/nonexistent-tmp-for-tests';
+  d.payload = { model: 'Opus 5.5', contextPct: 42, sessionId: 's', projectDir: '/w/proj', currentDir: '/w/proj', worktreeName: null, worktreePath: null };
+  return d;
+};
+
+test('--statusline compact: model, context bar, short-label windows, project', async () => {
+  const out = await runCli('--statusline', '/proj', compactDeps());
+  assert.equal(out, 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 72%↑ 06:00 │ 7d 39% Wed 10:00 │ proj');
+});
+
+test('--statusline compact: show_* toggles and layout classic', async () => {
+  const off = await runCli('--statusline', '/proj', compactDeps({ cfg: { showModel: false, showContext: false, showPaths: false } }));
+  assert.equal(off, '5h 72%↑ 06:00 │ 7d 39% Wed 10:00');
+  const classic = await runCli('--statusline', '/proj', compactDeps({ cfg: { layout: 'classic' } }));
+  assert.equal(classic, '🟢 Limit session: 72% → 06:00 · 🟢 Week Limit: 39% → Wednesday 6/3/2026 10:00');
+});
+
+test('--context stays classic even when layout is compact', async () => {
+  const out = JSON.parse(await runCli('--context', '/proj', compactDeps()));
+  assert.match(out.hookSpecificOutput.additionalContext, /🟢 Limit session: 72% → 06:00/);
+  assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /▰|Opus/);
+});
+
+test('--statusline compact: no usage keeps the classic fallback', async () => {
+  const d = compactDeps();
+  d.getUsage = async () => null;
+  d.stdinUsage = null;
+  assert.equal(await runCli('--statusline', '/proj', d), '⚪ limit ?');
+});
+
+test('--statusline compact: a throw while building paths prints the classic line and logs via debug', async () => {
+  const d = compactDeps();
+  const logged = [];
+  d.buildPaths = () => { throw new Error('boom'); };
+  d.debug = (...a) => logged.push(a.join(' '));
+  const out = await runCli('--statusline', '/proj', d);
+  assert.equal(out, '🟢 Limit session: 72% → 06:00 · 🟢 Week Limit: 39% → Wednesday 6/3/2026 10:00');
+  assert.ok(logged.some((l) => /boom/.test(l)), JSON.stringify(logged));
+});
+
+test('--statusline compact: fallback glyphs follow resolveStyle, not the terminal tier', async () => {
+  const d = compactDeps({ cfg: { style: 'emoji' } });
+  d.env = { TMUX: '/t' }; // basic tier
+  d.getUsage = async () => null;
+  d.stdinUsage = null;
+  assert.equal(await runCli('--statusline', '/proj', d), '⚪ limit ?');
+});
+
+test('parseFields: bad JSON, empty input and a full payload', () => {
+  const empty = { model: null, contextPct: null, sessionId: null, projectDir: null, currentDir: null, worktreeName: null, worktreePath: null };
+  assert.deepEqual(parseFields('{ not json'), empty);
+  assert.deepEqual(parseFields(''), empty);
+  assert.deepEqual(parseFields(JSON.stringify({
+    model: { display_name: 'Opus 5.5' }, session_id: 's', workspace: { project_dir: '/p', current_dir: '/p/x' },
+    context_window: { used_percentage: 42 }, worktree: { name: 'w', path: '/wt' },
+  })), { model: 'Opus 5.5', contextPct: 42, sessionId: 's', projectDir: '/p', currentDir: '/p/x', worktreeName: 'w', worktreePath: '/wt' });
 });

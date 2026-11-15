@@ -6,17 +6,17 @@ import { dirname, join } from 'node:path';
 import { loadConfig } from '../lib/config.mjs';
 import { resolveLocale } from '../lib/format.mjs';
 import { getMessages } from '../lib/messages.mjs';
-import { probeTokenPresent, probeStatusLineWired, probeCacheAge } from '../lib/health.mjs';
+import { probeTokenPresent, probeStatusLineWired, probeCacheAge, probeLinksHidden } from '../lib/health.mjs';
 
 // Pure renderer: takes an array of { key, ok, hint?, note? } checks and a locale, returns a
-// localized multi-line report. ✅ for ok, ❌ for not-ok (with an indented hint), and a neutral
+// localized multi-line report. ℹ️ for an info-only line (never a failure), ✅ for ok, ❌ for not-ok (with an indented hint), and a neutral
 // line carrying a (note) when a check could not be determined.
 export function renderDoctor(checks, opts = {}) {
   const m = getMessages(resolveLocale(opts.locale));
   const lines = [`=== ${m.doctorHeader} ===`, ''];
   for (const c of checks) {
     const label = m['doctor_' + c.key] ?? c.key;
-    let line = `${c.ok ? '✅' : '❌'} ${label}`;
+    let line = `${c.info ? 'ℹ️' : c.ok ? '✅' : '❌'} ${label}`;
     if (c.note) line += ` (${c.note})`;
     lines.push(line);
     if (!c.ok && c.hint) lines.push(`   → ${c.hint}`);
@@ -58,6 +58,9 @@ async function main() {
 
   const ageMs = probeCacheAge();
   checks.push({ key: 'cache', ok: ageMs != null && ageMs < 5 * 60_000, hint: m.doctorHint_cache });
+
+  // Info only: Windows Terminal hides links unless FORCE_HYPERLINK=1 (see /limit-guard-setup).
+  if (probeLinksHidden()) checks.push({ key: 'hyperlink', info: true, ok: true });
 
   // Version-vs-latest: neutral on any error so an offline run never shows a false ❌.
   const version = pluginVersion();

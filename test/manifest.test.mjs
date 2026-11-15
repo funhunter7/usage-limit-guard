@@ -99,3 +99,25 @@ test('commands/limit-guard-setup.md: drives bin/setup.mjs via CLAUDE_PLUGIN_ROOT
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/setup\.mjs/, 'must invoke bin/setup.mjs');
   assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
 });
+
+test('commands/limit-guard-legend.md: drives bin/legend.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+  const md = readFileSync(join(root, 'commands/limit-guard-legend.md'), 'utf8');
+  assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
+  assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/legend\.mjs/, 'must invoke bin/legend.mjs');
+  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+});
+
+test('commands/limit-guard-setup.md: offers FORCE_HYPERLINK via AskUserQuestion and --force-hyperlink', () => {
+  const md = readFileSync(join(root, 'commands/limit-guard-setup.md'), 'utf8');
+  assert.match(md, /allowed-tools:.*AskUserQuestion/, 'must allow AskUserQuestion');
+  assert.match(md, /WT_SESSION/);
+  assert.match(md, /bin\/setup\.mjs" "\$\{CLAUDE_PLUGIN_ROOT\}" --force-hyperlink/);
+});
+
+test('hooks/hooks.json: keeps the command hooks and names the band mod; plugin.json has no engines range', () => {
+  const hooks = JSON.parse(readFileSync(join(root, 'hooks/hooks.json'), 'utf8'));
+  assert.deepEqual(hooks.modules, ['./band.tsx']);
+  assert.ok(hooks.hooks.UserPromptSubmit && hooks.hooks.Stop && hooks.hooks.SessionStart);
+  assert.ok(readFileSync(join(root, 'hooks/band.tsx'), 'utf8').includes('export const register'));
+  assert.equal(JSON.parse(readFileSync(join(root, '.claude-plugin/plugin.json'), 'utf8')).engines, undefined);
+});

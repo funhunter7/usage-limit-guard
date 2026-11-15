@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.13.0 — 2026-11-15
+
+- **Added: compact status line (new default layout).** One line with the model, a context-window
+  bar, every watched limit window (short label, colored percentage, reset time), the optional
+  projection, and the project, worktree and scratch folder. New options `layout` (`compact` /
+  `classic`), `show_model`, `show_context`, `pace_arrow`, `window_display` (`all` / `nearest`),
+  `show_paths`, `scratch_dir` and `bar_style`; `layout: classic` keeps the v0.12 line exactly, and the
+  `--context` text injected into Claude is unchanged.
+- **Added: pace arrow.** `↑` (`^` in ascii) after a window's percentage when usage is at least 10
+  points ahead of the elapsed window time.
+- **Added: terminal tiers.** `style` now accepts `basic` besides `auto` / `emoji` / `ascii`
+  (`emoji` = full). `auto` detects Windows Terminal, iTerm2, WezTerm, VS Code, Kitty and others
+  (full), tmux/JetBrains/Konsole/Terminal.app (basic) and the legacy Windows console (ascii), and
+  picks colors, bar glyphs, separators and emoji accordingly. `NO_COLOR` is honored.
+- **Added: clickable folder links.** In the full tier the project, worktree and scratch segments open
+  the folder (needs `FORCE_HYPERLINK=1` in Windows Terminal, see `/limit-guard-setup`).
+- **Added: legend mode in the band.** A Claude Code mod (`hooks/band.tsx`, Claude Code 2.1.287 or
+  newer; older versions ignore it) draws a `ⓘ popisky` / `ⓘ skrýt popisky` (`ⓘ legend` / `ⓘ hide
+  legend`) button above the prompt; with it on, a dim block under the button explains every status
+  line segment (Czech or English by locale). It redraws on the press, so it toggles instantly; the
+  status line stays one row. Also `/limit-guard-legend on` / `off`; `/limit-guard-status` shows the state.
+- **Added: `/limit-guard-legend`** explains every status line item with samples in your terminal's
+  glyph set, plus [docs/legend.en.md](docs/legend.en.md) and [docs/legend.cs.md](docs/legend.cs.md).
+  Strings are translated into all 16 languages.
+- **Added: `/limit-guard-setup` offers `FORCE_HYPERLINK=1`** in Windows Terminal (where Claude Code
+  hides links without it) via the new `--force-hyperlink` flag, with the usual settings backup.
+  `/limit-guard-doctor` shows an info line while it is missing. An explicit `FORCE_HYPERLINK=0` is
+  respected (never turned into `1`, no offer, no doctor note).
+- **Fix: `/limit-guard-setup` never overwrites a `settings.json` it cannot parse** (BOM is tolerated);
+  it aborts and writes nothing. A non-object `env` is left alone as well.
+
 ## 0.12.0 — 2026-06-23
 
 - **Added: model-aware `auto` watch (new default).** The `watch` setting now defaults to `auto`:

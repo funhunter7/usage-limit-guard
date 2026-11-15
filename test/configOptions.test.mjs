@@ -108,3 +108,35 @@ test('coerceOptionValue: watch=auto -> "auto"', () => {
   assert.equal(coerceOptionValue('watch', 'auto'), 'auto');
   assert.equal(coerceOptionValue('watch', ' AUTO '), 'auto');
 });
+
+test('coerceOptionValue: boolean options accept true/false/on/off', () => {
+  assert.equal(coerceOptionValue('show_model', 'true'), true);
+  assert.equal(coerceOptionValue('pace_arrow', 'Off'), false);
+  assert.throws(() => coerceOptionValue('show_paths', 'maybe'), /true, false/);
+});
+
+test('coerceOptionValue: layout / window_display / style basic / scratch_dir', () => {
+  assert.equal(coerceOptionValue('layout', 'classic'), 'classic');
+  assert.throws(() => coerceOptionValue('layout', 'wide'), /compact, classic/);
+  assert.equal(coerceOptionValue('window_display', 'nearest'), 'nearest');
+  assert.equal(coerceOptionValue('style', 'basic'), 'basic');
+  assert.equal(coerceOptionValue('scratch_dir', ' tmp/x '), 'tmp/x');
+});
+
+test('CONFIG_OPTIONS: v0.13 options map to camelCase project keys', () => {
+  assert.equal(CONFIG_OPTIONS.show_model.projectKey, 'showModel');
+  assert.equal(CONFIG_OPTIONS.show_context.projectKey, 'showContext');
+  assert.equal(CONFIG_OPTIONS.pace_arrow.projectKey, 'paceArrow');
+  assert.equal(CONFIG_OPTIONS.show_paths.projectKey, 'showPaths');
+  assert.equal(CONFIG_OPTIONS.window_display.projectKey, 'windowDisplay');
+  assert.equal(CONFIG_OPTIONS.help_links, undefined);
+  assert.equal(CONFIG_OPTIONS.scratch_dir.projectKey, 'scratchDir');
+  assert.equal(CONFIG_OPTIONS.layout.globalKey, 'layout');
+});
+
+test('coerceOptionValue: bar_style enum and boolean error text', () => {
+  assert.equal(coerceOptionValue('bar_style', 'braille'), 'braille');
+  assert.throws(() => coerceOptionValue('bar_style', 'zigzag'), /pill, block, shade/);
+  assert.throws(() => coerceOptionValue('show_model', 'maybe'), /true, false, on, off/);
+  assert.equal(CONFIG_OPTIONS.bar_style.projectKey, 'barStyle');
+});

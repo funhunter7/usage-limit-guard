@@ -5,13 +5,14 @@ import { loadConfig } from '../lib/config.mjs';
 import { readHistory, HISTORY_PATH } from '../lib/history.mjs';
 import { resolveLocale } from '../lib/format.mjs';
 import { getMessages } from '../lib/messages.mjs';
+import { isLegendOn } from '../lib/legendFlag.mjs';
 import { probeTokenPresent, probeStatusLineWired, probeCacheAge } from '../lib/health.mjs';
 
 // Pure: takes a resolved config object and a health snapshot, returns a
 // localized multi-line diagnostic string. No I/O, no Date.now().
 //
 // cfg    – resolved config (from loadConfig)
-// health – { tokenPresent: bool, cacheAgeMs: number|null, statusLineWired: bool }
+// health – { tokenPresent: bool, cacheAgeMs: number|null, statusLineWired: bool, legendOn?: bool }
 export function renderStatus(cfg, health) {
   const locale = resolveLocale(cfg.locale);
   const m = getMessages(locale);
@@ -30,6 +31,15 @@ export function renderStatus(cfg, health) {
     `  labelStyle: ${cfg.labelStyle ?? '-'}`,
     `  resetDisplay: ${cfg.resetDisplay ?? '-'}`,
     `  projectionDisplay: ${cfg.projectionDisplay ?? '-'}`,
+    `  layout: ${cfg.layout ?? '-'}`,
+    `  legend: ${health.legendOn ? 'on' : 'off'}`,
+    `  barStyle: ${cfg.barStyle ?? '-'}`,
+    `  windowDisplay: ${cfg.windowDisplay ?? '-'}`,
+    `  showModel: ${cfg.showModel ?? '-'}`,
+    `  showContext: ${cfg.showContext ?? '-'}`,
+    `  paceArrow: ${cfg.paceArrow ?? '-'}`,
+    `  showPaths: ${cfg.showPaths ?? '-'}`,
+    `  scratchDir: ${cfg.scratchDir || '-'}`,
     `  style: ${cfg.style ?? '-'}`,
     `  timeFormat: ${cfg.timeFormat ?? '-'}`,
     `  locale: ${cfg.locale ?? '-'}`,
@@ -74,7 +84,7 @@ function main() {
   const statusLineWired = probeStatusLineWired();
   const historyCount = readHistory(HISTORY_PATH).length;
 
-  const health = { tokenPresent, cacheAgeMs, statusLineWired, historyCount };
+  const health = { tokenPresent, cacheAgeMs, statusLineWired, historyCount, legendOn: isLegendOn() };
   process.stdout.write(renderStatus(cfg, health) + '\n');
 }
 

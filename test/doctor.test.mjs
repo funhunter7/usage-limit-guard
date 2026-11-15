@@ -25,3 +25,9 @@ test('renderDoctor: localizes the header (cs)', () => {
   assert.equal(typeof out, 'string');
   assert.ok(out.length > 0);
 });
+
+test('renderDoctor: info line shows the info marker, not a cross, and no hint', () => {
+  const out = renderDoctor([{ key: 'hyperlink', info: true, ok: true }], { locale: 'en-US' });
+  assert.match(out, /ℹ️.*FORCE_HYPERLINK=1/);
+  assert.doesNotMatch(out, /❌|✅/);
+});

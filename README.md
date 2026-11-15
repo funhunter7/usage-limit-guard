@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.12.0-brightgreen)
+![Version](https://img.shields.io/badge/version-0.13.0-brightgreen)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Windows%20·%20macOS%20·%20Linux-lightgrey)
 
@@ -33,6 +33,7 @@ when it resets — a same-day reset shows just the time, a later one adds the we
 - [Install](#install)
 - [Commands](#commands)
 - [Configuration](#configuration)
+- [Status line layout](#status-line-layout)
 - [How it works](#how-it-works)
 - [Troubleshooting](#troubleshooting)
 
@@ -112,7 +113,8 @@ plugin makes no network call until a window's reset time has actually passed.)
 | **`/limit-guard-status`** | Print the resolved config plus a health snapshot — token, status-line cache age, whether the status line is wired, and burn-rate history readings. |
 | **`/limit-guard-stats`** | Summarize recent usage from the rolling ~7-day log: number of readings, peak 5h/7d utilization, and reset count. |
 | **`/limit-guard-doctor`** | Run a self-check — Node version, OAuth token, whether the status line is wired, cache freshness, and installed-vs-latest plugin version — with a fix hint for anything failing. |
-| **`/limit-guard-setup`** | Auto-wire the status line into `~/.claude/settings.json` (backing up the previous file first), including `refreshInterval: 60` so it stays current while idle. Idempotent — a no-op when it's already wired; re-run it to add `refreshInterval` to an older wiring. |
+| **`/limit-guard-setup`** | Auto-wire the status line into `~/.claude/settings.json` (backing up the previous file first), including `refreshInterval: 60` so it stays current while idle. Idempotent — a no-op when it's already wired; re-run it to add `refreshInterval` to an older wiring. In Windows Terminal it also offers to set `FORCE_HYPERLINK=1` so the status line links are clickable. |
+| **`/limit-guard-legend`** | Explain every status line item (model, context bar, limits, pace arrow, projection, paths) with samples in your terminal's glyph set. See also [docs/legend.en.md](docs/legend.en.md). `/limit-guard-legend on` / `off` switches [legend mode](#legend-mode) (a block in the band above the prompt). |
 | **`/limit-guard-snooze`** | Temporarily pause the guard's stop/handoff directives until the next reset (`/limit-guard-snooze clear` cancels early). The status line and notifications keep working. |
 
 Both write through a validated helper that preserves your other settings.
@@ -147,6 +149,14 @@ Settings you can change **directly in Claude Code** via `/config` (under this pl
 | `label_style` | enum | `full` | Window labels: `full` (`Limit session:` / `Week Limit:`) or `short` (`5h` / `7d`) to save line width. |
 | `reset_display` | enum | `clock` | Reset time as `clock` (`→ 06:00`), `relative` (`→ in 2h13m`), or `both` (`→ 06:00 (in 2h13m)`). |
 | `projection_display` | enum | `off` | When `on`, adds a burn-rate estimate like `📈 ~1h40m to 90%` for the soonest-to-breach window, from the recent usage trend. |
+| `layout` | enum | `compact` | `compact` (model, context bar, limit windows, project paths — see [Status line layout](#status-line-layout)) or `classic` (the v0.12 limits-only line, unchanged). |
+| `show_model` | bool | `true` | Show the active model name (compact layout). |
+| `show_context` | bool | `true` | Show the context-window bar (compact layout). |
+| `pace_arrow` | bool | `true` | Add `↑` after a window's percentage when usage runs at least 10 points ahead of the elapsed window time. |
+| `window_display` | enum | `all` | `all` shows every watched window; `nearest` only the one closest to its threshold. |
+| `show_paths` | bool | `true` | Show project, worktree and scratch folder segments. |
+| `scratch_dir` | string | `""` | Folder for the scratch segment (relative to the project). Empty = Claude Code's built-in scratchpad. |
+| `bar_style` | enum | `pill` | Context bar glyphs: `pill`, `block`, `shade`, `square`, `dot`, `rect`, `line`, `braille` or `smooth`. Falls back to `block` in terminals without the glyphs. |
 | `notifications` | enum | `off` | When `on`, pops up an OS notification once when a window enters the warn band or crosses the threshold (macOS/Linux/Windows, best-effort). |
 
 ### Auto-detected (not in the `/config` dialog)
@@ -158,7 +168,7 @@ These follow your environment, so `/config` doesn't prompt for them. Override on
 |--------|---------|--------|
 | `locale` | `system` | Language for the weekday/date and messages — follows the **OS locale** (Windows & Linux), so you needn't set a language. Override with a BCP-47 tag like `cs-CZ`, `de-DE`, `ja-JP`. |
 | `time_format` | `system` | Reset time format: `system` (follow OS), `12` (`→ 5:00 PM`), or `24` (`→ 17:00`). |
-| `style` | `auto` | Status-line glyphs: `auto` (detect terminal), `emoji`, or `ascii` (safe for legacy cmd/conhost). |
+| `style` | `auto` | Terminal tier of the status line: `auto` (detect terminal), `emoji` (= full), `basic` or `ascii` (safe for legacy cmd/conhost). |
 
 ### Setting values
 
@@ -194,6 +204,55 @@ project to override these settings for that project only.
 > The status line is a plain user setting, so Claude Code does not inject the option env vars
 > for it. The plugin therefore reads your `/config` options straight from `settings.json`, so
 > they apply to the status line too — not only to the hooks.
+
+## Status line layout
+
+The default `compact` layout puts the most useful facts on one line (colors and links where your terminal supports them):
+
+```text
+Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ my-project │ 🌿 rule-fixes │ 📁 scratchpad
+```
+
+Model, context-window bar (green below 50 %, amber below 80 %, red above), each watched limit
+window with its reset time, the optional projection, then project, worktree (only inside a linked git
+worktree) and scratch folder. `↑` means usage is at least 10 points ahead of the elapsed window time.
+Segments without data are left out. Set `layout: classic` for the old limits-only line; the
+`--context` text injected into Claude is never affected. Every item is explained in
+[docs/legend.en.md](docs/legend.en.md) (Czech: [docs/legend.cs.md](docs/legend.cs.md)) and by `/limit-guard-legend`.
+
+The look follows your terminal (`style: auto`):
+
+| Tier | Detected as | Look |
+|------|-------------|------|
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Ghostty, Alacritty, modern VTE terminals (not under tmux/screen) | 256 colors, `▰▱` bar, `│`, `🌿`/`📁`, clickable links |
+| basic | tmux/screen, JetBrains, Konsole, Terminal.app, other Unix terminals | 16 colors, `█░` bar, `│`, no emoji, no links |
+| ascii | legacy Windows console (cmd/PowerShell host), ConEmu, `TERM=dumb` | 16 colors, `[####------]` bar, `\|`, `^` arrow, no links |
+
+`NO_COLOR` removes all colors.
+
+**Clickable links.** In the full tier the project/worktree/scratch segments open the folder. Claude Code
+hides terminal links in **Windows Terminal** unless `FORCE_HYPERLINK=1` is set, so
+`/limit-guard-setup` offers to add it to `settings.json` (`env`) — note that it then applies to every
+link Claude Code prints. `/limit-guard-doctor` shows an info line while it is missing; `FORCE_HYPERLINK=0`
+turns links off everywhere.
+
+### Legend mode
+
+Legend mode adds a short, dim explanation block under the **ⓘ legend** button the plugin draws above the
+prompt (what the model, context bar, `5h` / `7d`, `↑`, reset time, project, worktree and scratch folder
+segments mean; Czech or English by your locale). The status line itself stays one row. Because the band
+redraws on a press, the block appears and disappears instantly.
+
+```text
+Opus 5.5 = model · ▰▱ 42% = context window (green <50%, yellow <80%, then red)
+5h = session limit · 7d = weekly limit · ↑ = usage runs ahead of time · time = when the limit resets
+name = project (click opens the folder) · 🌿 = worktree · 📁 = scratch folder
+```
+
+Switch it with the button (hotkey `l` while the band has focus; needs Claude Code 2.1.287 or newer,
+older versions just don't show the button) or with `/limit-guard-legend on` / `off`. Both toggle the
+flag file `.limit-guard-legend` in your Claude config directory (`CLAUDE_CONFIG_DIR`, default `~/.claude`);
+`/limit-guard-status` shows its state.
 
 ## How it works
 
