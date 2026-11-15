@@ -80,9 +80,10 @@ test('resolveTier: bar glyph set and OSC 8 links gating', () => {
 
 test('compact full tier: target look with colors, pill bar, separators', () => {
   const out = compact(usage(84, 25), { model: 'Opus 5.5', contextPct: 42, paths: [{ kind: 'project', name: 'proj', dir: '/p' }] });
-  assert.equal(strip(out), 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 12:00 │ 7d 25% Wed 10:00 │ 🏠 proj');
+  assert.equal(strip(out), '🤖 Opus 5.5 │ 🧠 ▰▰▰▰▱▱▱▱▱▱ 42% │ ⏳ 5h 84%↑ 12:00 │ 📅 7d 25% Wed 10:00 │ 🏠 proj');
   assert.ok(out.includes(`${ESC}[38;5;114m▰▰▰▰▱▱▱▱▱▱ 42%${ESC}[0m`)); // green context
-  assert.ok(out.includes(`${ESC}[38;5;245m5h${ESC}[0m`)); // dim label
+  assert.ok(out.includes(`⏳ ${ESC}[38;5;245m5h${ESC}[0m`)); // dim label, icon uncolored
+  assert.ok(out.startsWith('🤖 Opus 5.5 │ 🧠 '));
   assert.ok(out.includes(`${ESC}[38;5;214m84%↑${ESC}[0m`)); // amber band
 });
 
@@ -143,16 +144,16 @@ test('compact: nearest picks highest utilization/threshold ratio, honoring overr
 
 test('compact: reset same day vs other day, relative and both', () => {
   const out = strip(compact(usage(10, 10)));
-  assert.match(out, /5h 10% 12:00 │ 7d 10% Wed 10:00/);
-  assert.match(strip(compact(usage(10, 10), { resetDisplay: 'relative' })), /5h 10% in 2h │ 7d 10% in 72h/);
+  assert.match(out, /5h 10% 12:00 │ 📅 7d 10% Wed 10:00/);
+  assert.match(strip(compact(usage(10, 10), { resetDisplay: 'relative' })), /5h 10% in 2h │ 📅 7d 10% in 72h/);
   assert.match(strip(compact(usage(10, 10), { resetDisplay: 'both' })), /5h 10% 12:00 \(in 2h\)/);
   assert.match(strip(compact(usage(10, 10), { locale: 'cs-CZ' })), /7d 10% st 10:00/);
 });
 
 test('compact: missing segments are omitted, no usage keeps classic fallbacks', () => {
   const out = strip(compact(usage(10, 10), { showModel: false, showContext: false, showPaths: false, model: 'M', contextPct: 5 }));
-  assert.equal(out, '5h 10% 12:00 │ 7d 10% Wed 10:00');
-  assert.equal(strip(compact({ five_hour: { utilization: 10 } }, { model: null, contextPct: null })), '5h 10%'); // 7d absent, no "?"
+  assert.equal(out, '⏳ 5h 10% 12:00 │ 📅 7d 10% Wed 10:00');
+  assert.equal(strip(compact({ five_hour: { utilization: 10 } }, { model: null, contextPct: null })), '⏳ 5h 10%'); // 7d absent, no "?"
   assert.equal(compact(null), '⚪ limit ?');
   assert.match(compact({ authError: true }), /🔑/);
   assert.equal(compact({}, { model: 'M' }), '⚪ limit ?');
@@ -179,7 +180,7 @@ test('compact: path segments keep their folder links, no other links', () => {
 
 test('compact: control characters in names cannot inject escapes', () => {
   const out = compact(usage(10, 10), { model: 'Bad\x1b[31m\x07', paths: [{ kind: 'project', name: 'a\x1bb', dir: null }] });
-  assert.ok(strip(out).startsWith('Bad[31m │'));
+  assert.ok(strip(out).startsWith('🤖 Bad[31m │'));
   assert.ok(!out.includes('\x07'));
 });
 
@@ -282,7 +283,7 @@ test('resolveTier: VTE_VERSION=5000 is not full; tmux + style=emoji is full but 
 test('bar_style: every style renders 10 cells; pill degrades to block, explicit styles are honored', () => {
   const bar = (tierArgs, pct, barStyle) => {
     const tier = resolveTier(...tierArgs, barStyle);
-    return strip(compact(usage(10, 10), { tier, contextPct: pct, showModel: false })).split(/ [│|] /)[0].replace(/ \d+%$/, '');
+    return strip(compact(usage(10, 10), { tier, contextPct: pct, showModel: false })).split(/ [│|] /)[0].replace(/^🧠 /, '').replace(/ \d+%$/, '');
   };
   const wt = ['auto', { WT_SESSION: 'a' }, 'win32'];
   const expected = {
@@ -314,16 +315,16 @@ function baseOpts() {
 test('compact: nearest ties pick the first watched key; single key; missing-data window ignored', () => {
   const tie = { five_hour: { utilization: 50 }, seven_day: { utilization: 50 } };
   const line = (u, watch) => formatStatusLine(u, 95, watch, { ...baseOpts(), windowDisplay: 'nearest' });
-  assert.equal(line(tie, ['five_hour', 'seven_day']), '5h 50%');
-  assert.equal(line(tie, ['seven_day', 'five_hour']), '7d 50%');
-  assert.equal(line(tie, ['seven_day']), '7d 50%');
-  assert.equal(line({ five_hour: { utilization: 10 }, seven_day: { utilization: null } }, ['five_hour', 'seven_day']), '5h 10%');
-  assert.equal(line({ seven_day: { utilization: 90 } }, ['five_hour', 'seven_day']), '7d 90%');
+  assert.equal(line(tie, ['five_hour', 'seven_day']), '⏳ 5h 50%');
+  assert.equal(line(tie, ['seven_day', 'five_hour']), '📅 7d 50%');
+  assert.equal(line(tie, ['seven_day']), '📅 7d 50%');
+  assert.equal(line({ five_hour: { utilization: 10 }, seven_day: { utilization: null } }, ['five_hour', 'seven_day']), '⏳ 5h 10%');
+  assert.equal(line({ seven_day: { utilization: 90 } }, ['five_hour', 'seven_day']), '📅 7d 90%');
 });
 
 test('compact: bidi/zero-width/line-separator characters are stripped (U+202E)', () => {
   const out = compact(usage(10, 10), { model: 'A\u202EB\u200BC\u2028D', paths: [{ kind: 'project', name: 'x\u202Ey', dir: null }] });
-  assert.ok(strip(out).startsWith('ABCD │'));
+  assert.ok(strip(out).startsWith('🤖 ABCD │'));
   assert.ok(out.endsWith('│ 🏠 xy'));
 });
 

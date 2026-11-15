@@ -3,7 +3,7 @@
 Sample line (compact layout, terminal tier "full"):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
+🤖 Opus 5.5 │ 🧠 ▰▰▰▰▱▱▱▱▱▱ 42% │ ⏳ 5h 84%↑ 20:08 │ 📅 7d 25% Wed 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
 Each segment can be turned off in the options (`show_model`, `show_context`, `pace_arrow`, `show_paths`, `window_display`).
@@ -14,20 +14,20 @@ Segments with no data are left out. The same list is available as `/limit-guard-
 <a id="model"></a>
 ## Model
 
-The model Claude Code is using right now (for example `Opus 5.5`). No color, nothing to act on.
+`🤖 Opus 5.5`: the model Claude Code is using right now. No color, nothing to act on.
 It follows `/model` switches immediately.
 
 <a id="context-window"></a>
 ## Context window
 
-A 10-cell bar with the percentage of the context window used by this conversation.
+`🧠 ▰▰▰▰▱▱▱▱▱▱ 42%`: a 10-cell bar with the percentage of the context window used by this conversation.
 Green below 50 %, amber below 80 %, red from 80 %. Nothing is shown until Claude Code reports a value
 (early in a session or right after `/compact`). At red, run `/compact` or start a new session.
 
 <a id="session-limit-5h"></a>
 ## Session limit (5h)
 
-`5h 84%↑ 20:08`: how much of the 5-hour window you used, and when it resets (just the time on the same day,
+`⏳ 5h 84%↑ 20:08`: how much of the 5-hour window you used, and when it resets (just the time on the same day,
 weekday plus time otherwise). The percentage is green, amber from `warn_band` (default 80 %) and red from
 `threshold` (default 95 %), where the guard saves a handoff. If it is red, wrap up or wait for the reset.
 With `window_display: nearest` only the watched window closest to its threshold is shown. The arrow
@@ -36,7 +36,7 @@ is explained in [Pace arrow](#pace-arrow).
 <a id="weekly-limit-7d"></a>
 ## Weekly limit (7d)
 
-`7d 25% Wed 09:00`: the same for the 7-day window. `7dO` and `7dS` are the separate Opus and Sonnet weekly
+`📅 7d 25% Wed 09:00`: the same for the 7-day window. `7dO` and `7dS` are the separate Opus and Sonnet weekly
 windows (shown when you use those models). Colors and thresholds are the same as for the session limit.
 A red weekly limit means you have to wait for the reset (or switch plan), so plan the big tasks.
 
@@ -56,7 +56,7 @@ usage trend. Shown only with `projection_display: on` and enough history. Treat 
 <a id="project"></a>
 ## Project
 
-The name of the project folder (`workspace.project_dir`). Click to open it where links work.
+`🏠 name`: the name of the project folder (`workspace.project_dir`). Click to open it where links work.
 
 <a id="worktree"></a>
 ## Worktree
@@ -75,7 +75,7 @@ The look follows what your terminal can draw (`style: auto`, or force `emoji` = 
 
 | Tier | Where | Look |
 |------|-------|------|
-| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 colors, `▰▱` bar, `│` separator, `🔀`/`📁`, links |
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 colors, `▰▱` bar, `│` separator, emoji icons, links |
 | basic | tmux/screen, JetBrains, Konsole, Terminal.app, other Unix terminals | 16 colors, `█░` bar, `│`, no emoji, no links |
 | ascii | legacy Windows console (cmd/PowerShell host), `TERM=dumb` | 16 colors, `[####------]` bar, `\|`, `^` arrow, no links |
 

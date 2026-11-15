@@ -31,17 +31,34 @@ async function legendOn($: EngineInterface): Promise<boolean> {
   }
 }
 
-// What each status line segment means. Static on purpose: the band redraws on a press, the status line does not.
-const LEGEND = {
+// What each status line segment means: one line per part, a part is [text, theme color?]; no color = dim.
+// Static on purpose: the band redraws on a press, the status line does not.
+type Part = readonly [string, ('success' | 'warning' | 'error')?]
+const G = 'success', Y = 'warning', R = 'error'
+const LEGEND: Record<'cs' | 'en', Part[][]> = {
   cs: [
-    'Opus 5.5 = model · ▰▱ 42% = paměť konverzace (zelená <50 %, žlutá <80 %, pak červená)',
-    '5h = limit relace · 7d = týdenní limit · ↑ = spotřeba předbíhá čas · čas = kdy se limit obnoví',
-    '🏠 název = projekt (klik otevře složku) · 🔀 = worktree · 📁 = odkládací složka',
+    [['🤖 model – kdo právě odpovídá']],
+    [['🧠 paměť konverzace – '], ['do 50 %', G], [' · '], ['do 80 %', Y], [' · '], ['víc', R], ['; když dojde, Claude zapomíná detaily']],
+    [['⏳ limit relace (5h) – spotřeba 5hodinového okna, čas = kdy se obnoví']],
+    [['📅 týdenní limit (7d) – spotřeba týdenního okna']],
+    [['barva čísla: '], ['v pořádku', G], [' · '], ['pozor (od 80 %)', Y], [' · '], ['práh překročen', R]],
+    [['↑ – spotřeba předbíhá čas o 10+ bodů']],
+    [['📈 – odhad, kdy limit dojde (jen když je zapnutý)']],
+    [['🏠 projekt – kliknutím otevřeš složku']],
+    [['🔀 worktree – oddělená kopie projektu (git worktree)']],
+    [['📁 odkládací složka – pracovní soubory Clauda']],
   ],
   en: [
-    'Opus 5.5 = model · ▰▱ 42% = context window (green <50%, yellow <80%, then red)',
-    '5h = session limit · 7d = weekly limit · ↑ = usage runs ahead of time · time = when the limit resets',
-    '🏠 🏠 name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder',
+    [['🤖 model – who is answering right now']],
+    [['🧠 conversation memory – '], ['up to 50%', G], [' · '], ['up to 80%', Y], [' · '], ['more', R], ['; when it runs out, Claude forgets details']],
+    [['⏳ session limit (5h) – usage of the 5-hour window, time = when it resets']],
+    [['📅 weekly limit (7d) – usage of the weekly window']],
+    [['number color: '], ['fine', G], [' · '], ['careful (from 80%)', Y], [' · '], ['threshold crossed', R]],
+    [['↑ – usage runs ahead of time by 10+ points']],
+    [['📈 – estimate of when the limit runs out (only when enabled)']],
+    [['🏠 project – click to open the folder']],
+    [['🔀 worktree – separate copy of the project (git worktree)']],
+    [['📁 scratch folder – Claude\'s working files']],
   ],
 }
 
@@ -70,7 +87,11 @@ export const register: Register = on => {
         <Box>
           <Button key="legend" label={label} hotkey="l" onPress={toggle} />
         </Box>
-        {isOn && LEGEND[cs ? 'cs' : 'en'].map((line, i) => <Text key={`legend-${i}`} dimColor>{line}</Text>)}
+        {isOn && LEGEND[cs ? 'cs' : 'en'].map((line, i) => (
+          <Text key={`legend-${i}`}>
+            {line.map(([text, color], j) => <Text key={j} color={color} dimColor={!color}>{text}</Text>)}
+          </Text>
+        ))}
       </Box>
     )
     return below ? <Box flexDirection="column">{mine}{below}</Box> : mine

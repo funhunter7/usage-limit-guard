@@ -34,7 +34,7 @@ test('legend off: the button offers it, no block; pressing writes on and the blo
   expect(writes.map(w => w.text)).toEqual(['on'])
   expect(flag(writes[0]?.path ?? '')).toBe('/cfg/.limit-guard-legend')
   expect((await ui.find({ key: 'legend' }))?.text).toContain('skrýt')
-  expect(await ui.find({ type: 'Text', text: /paměť konverzace/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🧠 paměť konverzace/ })).toBeDefined()
   expect(await ui.find({ type: 'Text', text: /odkládací složka/ })).toBeDefined()
   await ui.unmount()
 })
@@ -45,7 +45,7 @@ test('legend on: English block under the button; pressing writes off and the blo
 
   const ui = await $.ui.mount(BAND())
   expect((await ui.find({ key: 'legend' }))?.text).toContain('hide')
-  expect(await ui.find({ type: 'Text', text: /context window/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🧠 conversation memory/ })).toBeDefined()
   await ui.press({ key: 'legend' })
   expect(writes.map(w => w.text)).toEqual(['off'])
   expect(flag(writes[0]?.path ?? '')).toBe('/cfg/.limit-guard-legend')
@@ -57,5 +57,19 @@ test('a survey on screen leaves the band alone', async ($, on) => {
   on('env.get', () => ({ value: undefined }))
   const ui = await $.ui.mount(BAND({ hasSurvey: true }))
   expect(await ui.find({ key: 'legend' })).toBeUndefined()
+  await ui.unmount()
+})
+
+test('legend on: one line per part, colored samples use theme colors, the rest is dim', async ($, on) => {
+  on('env.get', env('cs_CZ.UTF-8'))
+  memoryFs(on, 'on')
+
+  const ui = await $.ui.mount(BAND())
+  expect(await ui.find({ type: 'Text', text: /^🧠 paměť konverzace – do 50 % · do 80 % · víc; když dojde, Claude zapomíná detaily$/ })).toBeDefined() // one line
+  expect(await ui.find({ type: 'Text', text: /^do 50 %$/ })).toMatchObject({ props: { color: 'success' } })
+  expect(await ui.find({ type: 'Text', text: /^do 80 %$/ })).toMatchObject({ props: { color: 'warning' } })
+  expect(await ui.find({ type: 'Text', text: /^práh překročen$/ })).toMatchObject({ props: { color: 'error' } })
+  const model = await ui.findAll({ type: 'Text', text: /^🤖 model – kdo právě odpovídá$/ })
+  expect(model.at(-1)).toMatchObject({ props: { dimColor: true } }) // the inner run
   await ui.unmount()
 })

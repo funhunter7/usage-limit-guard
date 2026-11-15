@@ -13,11 +13,13 @@ test('renderLegend: cs on Windows Terminal uses full-tier glyphs, one "sample �
   const lines = renderLegend(cfg(), { WT_SESSION: 'x' }, 'win32').split('\n');
   assert.equal(lines.length, 1 + 9 + 1); // header, 9 items, docs link
   assert.match(lines[0], /legenda/);
-  assert.equal(lines[1], 'Opus 5.5 — aktivní model');
-  assert.match(lines[2], /^▰▰▰▰▱▱▱▱▱▱ 42% — /);
-  assert.match(lines[3], /^5h 42% — limit relace/);
+  assert.equal(lines[1], '🤖 Opus 5.5 — aktivní model');
+  assert.match(lines[2], /^🧠 ▰▰▰▰▱▱▱▱▱▱ 42% — /);
+  assert.match(lines[3], /^⏳ 5h 42% — limit relace/);
+  assert.match(lines[4], /^📅 7d 25% — /);
   assert.match(lines[5], /^84%↑ — /);
   assert.match(lines[6], /^📈 ~1h40m do 90% — /);
+  assert.match(lines[7], /^🏠 my-project — /);
   assert.match(lines[8], /^🔀 my-branch — /);
   assert.match(lines[9], /^📁 scratchpad — odkládací složka/);
   assert.equal(lines[10], 'Podrobnosti: https://github.com/funhunter7/claude-limit-guard/blob/main/docs/legend.cs.md');
@@ -27,7 +29,7 @@ test('renderLegend: ascii tier uses [#] bar, ^ arrow and no emoji; never emits S
   const out = renderLegend(cfg({ locale: 'en-US' }), { NO_COLOR: '' }, 'win32');
   assert.match(out, /\[####------\] 42% — /);
   assert.match(out, /84%\^ — /);
-  assert.doesNotMatch(out, /🔀|📁|\x1b/); // eslint-disable-line no-control-regex
+  assert.doesNotMatch(out, /🤖|🧠|⏳|📅|🏠|🔀|📁|\x1b/); // eslint-disable-line no-control-regex
   assert.match(out, /docs\/legend\.en\.md$/);
 });
 

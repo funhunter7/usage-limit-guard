@@ -435,12 +435,12 @@ const compactDeps = (extra = {}) => {
 
 test('--statusline compact: model, context bar, short-label windows, project', async () => {
   const out = await runCli('--statusline', '/proj', compactDeps());
-  assert.equal(out, 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 72%↑ 06:00 │ 7d 39% Wed 10:00 │ 🏠 proj');
+  assert.equal(out, '🤖 Opus 5.5 │ 🧠 ▰▰▰▰▱▱▱▱▱▱ 42% │ ⏳ 5h 72%↑ 06:00 │ 📅 7d 39% Wed 10:00 │ 🏠 proj');
 });
 
 test('--statusline compact: show_* toggles and layout classic', async () => {
   const off = await runCli('--statusline', '/proj', compactDeps({ cfg: { showModel: false, showContext: false, showPaths: false } }));
-  assert.equal(off, '5h 72%↑ 06:00 │ 7d 39% Wed 10:00');
+  assert.equal(off, '⏳ 5h 72%↑ 06:00 │ 📅 7d 39% Wed 10:00');
   const classic = await runCli('--statusline', '/proj', compactDeps({ cfg: { layout: 'classic' } }));
   assert.equal(classic, '🟢 Limit session: 72% → 06:00 · 🟢 Week Limit: 39% → Wednesday 6/3/2026 10:00');
 });

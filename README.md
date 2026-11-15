@@ -210,10 +210,10 @@ project to override these settings for that project only.
 The default `compact` layout puts the most useful facts on one line (colors and links where your terminal supports them):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
+🤖 Opus 5.5 │ 🧠 ▰▰▰▰▱▱▱▱▱▱ 42% │ ⏳ 5h 84%↑ 20:08 │ 📅 7d 25% Wed 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
-Model, context-window bar (green below 50 %, amber below 80 %, red above), each watched limit
+Model (🤖), context-window bar (🧠) (green below 50 %, amber below 80 %, red above), each watched limit
 window with its reset time, the optional projection, then project, worktree (only inside a linked git
 worktree) and scratch folder. `↑` means usage is at least 10 points ahead of the elapsed window time.
 Segments without data are left out. Set `layout: classic` for the old limits-only line; the
@@ -224,7 +224,7 @@ The look follows your terminal (`style: auto`):
 
 | Tier | Detected as | Look |
 |------|-------------|------|
-| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Ghostty, Alacritty, modern VTE terminals (not under tmux/screen) | 256 colors, `▰▱` bar, `│`, `🔀`/`📁`, clickable links |
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Ghostty, Alacritty, modern VTE terminals (not under tmux/screen) | 256 colors, `▰▱` bar, `│`, emoji icons, clickable links |
 | basic | tmux/screen, JetBrains, Konsole, Terminal.app, other Unix terminals | 16 colors, `█░` bar, `│`, no emoji, no links |
 | ascii | legacy Windows console (cmd/PowerShell host), ConEmu, `TERM=dumb` | 16 colors, `[####------]` bar, `\|`, `^` arrow, no links |
 
@@ -238,15 +238,22 @@ turns links off everywhere.
 
 ### Legend mode
 
-Legend mode adds a short, dim explanation block under the **ⓘ legend** button the plugin draws above the
+Legend mode adds a short explanation block, one line per part (the color samples drawn in real colors, the rest dim) under the **ⓘ legend** button the plugin draws above the
 prompt (what the model, context bar, `5h` / `7d`, `↑`, reset time, project, worktree and scratch folder
 segments mean; Czech or English by your locale). The status line itself stays one row. Because the band
 redraws on a press, the block appears and disappears instantly.
 
 ```text
-Opus 5.5 = model · ▰▱ 42% = context window (green <50%, yellow <80%, then red)
-5h = session limit · 7d = weekly limit · ↑ = usage runs ahead of time · time = when the limit resets
-🏠 name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder
+🤖 model – who is answering right now
+🧠 conversation memory – up to 50% · up to 80% · more; when it runs out, Claude forgets details
+⏳ session limit (5h) – usage of the 5-hour window, time = when it resets
+📅 weekly limit (7d) – usage of the weekly window
+number color: fine · careful (from 80%) · threshold crossed
+↑ – usage runs ahead of time by 10+ points
+📈 – estimate of when the limit runs out (only when enabled)
+🏠 project – click to open the folder
+🔀 worktree – separate copy of the project (git worktree)
+📁 scratch folder – Claude's working files
 ```
 
 Switch it with the button (hotkey `l` while the band has focus; needs Claude Code 2.1.287 or newer,

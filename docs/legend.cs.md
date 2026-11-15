@@ -3,7 +3,7 @@
 Ukázka řádku (kompaktní rozvržení, terminál úrovně „full"):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% st 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
+🤖 Opus 5.5 │ 🧠 ▰▰▰▰▱▱▱▱▱▱ 42% │ ⏳ 5h 84%↑ 20:08 │ 📅 7d 25% st 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
 Každou část můžeš vypnout v nastavení (`show_model`, `show_context`, `pace_arrow`, `show_paths`, `window_display`).
@@ -13,19 +13,19 @@ v pruhu nad promptem (tlačítko `ⓘ popisky` tam dělá totéž, hned a bez č
 <a id="model"></a>
 ## Model
 
-Model, který Claude Code právě používá (například `Opus 5.5`). Nemá barevné prahy, jen název.
+`🤖 Opus 5.5`: model, který Claude Code právě používá. Nemá barevné prahy, jen název.
 Po přepnutí přes `/model` se změní hned.
 
 <a id="pamet-konverzace"></a>
 ## Paměť konverzace
 
-Desetidílný pruh s procenty kontextového okna zaplněného touto konverzací.
+`🧠 ▰▰▰▰▱▱▱▱▱▱ 42%`: desetidílný pruh s procenty kontextového okna zaplněného touto konverzací.
 Zelená do 50 %, oranžová do 80 %, od 80 % červená. Hodnota se zobrazí, až ji Claude Code pošle (ne hned na začátku relace a těsně po `/compact`). Při červené spusť `/compact` nebo začni novou relaci.
 
 <a id="limit-relace-5h"></a>
 ## Limit relace (5h)
 
-`5h 84%↑ 20:08`: kolik z pětihodinového okna jsi spotřeboval a kdy se obnoví (týž den jen čas,
+`⏳ 5h 84%↑ 20:08`: kolik z pětihodinového okna jsi spotřeboval a kdy se obnoví (týž den jen čas,
 jindy zkratka dne a čas). Procento je zelené, od `warn_band` (výchozí 80 %) oranžové a od `threshold`
 (výchozí 95 %) červené; tam hlídač uloží předání práce. Při červené dokonči rozdělanou práci
 nebo počkej na reset. S `window_display: nearest` se zobrazí jen okno nejblíž prahu. Šipku vysvětluje
@@ -34,7 +34,7 @@ nebo počkej na reset. S `window_display: nearest` se zobrazí jen okno nejblí�
 <a id="tydenni-limit-7d"></a>
 ## Týdenní limit (7d)
 
-`7d 25% st 09:00`: totéž pro sedmidenní okno. `7dO` a `7dS` jsou samostatná týdenní okna pro Opus a Sonnet
+`📅 7d 25% st 09:00`: totéž pro sedmidenní okno. `7dO` a `7dS` jsou samostatná týdenní okna pro Opus a Sonnet
 (zobrazí se, když je používáš). Barvy a prahy jsou stejné jako u limitu relace.
 Červený týdenní limit znamená čekat na reset (nebo změnit tarif), takže větší úkoly si naplánuj.
 
@@ -54,7 +54,7 @@ spotřeby. Zobrazí se jen s `projection_display: on` a dostatkem historie. Ber 
 <a id="projekt"></a>
 ## Projekt
 
-Název složky projektu (`workspace.project_dir`). Kliknutím ji otevřeš tam, kde odkazy fungují.
+`🏠 název`: název složky projektu (`workspace.project_dir`). Kliknutím ji otevřeš tam, kde odkazy fungují.
 
 <a id="worktree"></a>
 ## Worktree
@@ -73,7 +73,7 @@ Vzhled se řídí tím, co tvůj terminál umí vykreslit (`style: auto`, nebo v
 
 | Úroveň | Kde | Vzhled |
 |--------|-----|--------|
-| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 barev, pruh `▰▱`, oddělovač `│`, `🔀`/`📁`, odkazy |
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 barev, pruh `▰▱`, oddělovač `│`, ikony emoji, odkazy |
 | basic | tmux/screen, JetBrains, Konsole, Terminal.app, ostatní unixové terminály | 16 barev, pruh `█░`, `│`, bez emoji, bez odkazů |
 | ascii | starší konzole Windows (cmd/PowerShell), `TERM=dumb` | 16 barev, pruh `[####------]`, `\|`, šipka `^`, bez odkazů |
 

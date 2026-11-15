@@ -8,6 +8,10 @@
   `classic`), `show_model`, `show_context`, `pace_arrow`, `window_display` (`all` / `nearest`),
   `show_paths`, `scratch_dir` and `bar_style`; `layout: classic` keeps the v0.12 line exactly, and the
   `--context` text injected into Claude is unchanged.
+- **Added: icons on every segment (full tier only).** `🤖` model, `🧠` context bar, `⏳` 5h window, `📅` 7d
+  windows, next to the existing `📈` / `🏠` / `🔀` / `📁`; icons are never colored and the basic/ascii
+  tiers stay icon-free. The band legend is now one line per part (`<icon> <name> – <meaning>`) with the
+  color samples drawn in real theme colors (green / amber / red) and the rest dim.
 - **Added: pace arrow.** `↑` (`^` in ascii) after a window's percentage when usage is at least 10
   points ahead of the elapsed window time.
 - **Added: terminal tiers.** `style` now accepts `basic` besides `auto` / `emoji` / `ascii`
