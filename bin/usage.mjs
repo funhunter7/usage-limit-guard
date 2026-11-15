@@ -149,7 +149,7 @@ export async function runCli(mode, cwd, deps = {}) {
       line = formatStatusLine(usage, cfg.threshold, watch, {
         ...lineOpts, layout: 'compact', tier, model: f.model, contextPct: f.contextPct,
         showModel: cfg.showModel, showContext: cfg.showContext, paceArrow: cfg.paceArrow,
-        windowDisplay: cfg.windowDisplay, showPaths: cfg.showPaths,
+        windowDisplay: cfg.windowDisplay, background: cfg.background, showPaths: cfg.showPaths,
         paths: cfg.showPaths ? buildPaths(f, { scratchDir: cfg.scratchDir, tmp }) : [],
       });
     } catch (e) {

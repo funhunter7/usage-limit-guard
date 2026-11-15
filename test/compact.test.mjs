@@ -383,3 +383,121 @@ test('resolveScratchDir: built-in lookup is cached per session and re-scanned wh
     assert.equal(resolveScratchDir(args), spB);
   } finally { done(); }
 });
+
+// ---- background option ----
+
+const E = (sgr) => `${ESC}[${sgr}m`;
+const R = `${ESC}[0m`;
+const bgOf = (background, u = usage(10, 10), extra = {}) => compact(u, { background, model: 'M', contextPct: 30, ...extra });
+const cells = (s) => [...strip(s)].length + 4; // the four emoji icons are 2 cells wide
+
+test('background: unset and off render no background SGR', () => {
+  for (const out of [bgOf(undefined, usage(96, 96)), bgOf('off', usage(96, 96))]) assert.ok(!/48;5|;4[0-7]m|\x1b\[100m/.test(out), out); // eslint-disable-line no-control-regex
+});
+
+test('background warn: amber limit gets a black-on-amber tile, plain inside, arrow kept', () => {
+  const out = bgOf('warn', usage(84, 25));
+  assert.ok(out.includes(`${E('38;5;16;48;5;214')} ⏳ 5h 84%↑ 12:00 ${R}`), out);
+  assert.ok(!out.includes('38;5;245m5h')); // no dim label inside the tile
+  assert.ok(out.includes(`📅 ${E('38;5;245')}7d${R} ${E('38;5;114')}25%${R}`)); // green limit untouched
+  assert.equal(strip(out), '🤖 M │ 🧠 ▰▰▰▱▱▱▱▱▱▱ 30% │  ⏳ 5h 84%↑ 12:00  │ 📅 7d 25% Wed 10:00');
+});
+
+test('background warn: red limit gets a white-on-red tile', () => {
+  const out = bgOf('warn', usage(96, 25));
+  assert.ok(out.includes(`${E('38;5;255;48;5;160')} ⏳ 5h 96%↑ 12:00 ${R}`), out);
+});
+
+test('background warn: no tile when every window is green', () => {
+  assert.ok(!bgOf('warn', usage(10, 10)).includes('48;5'));
+});
+
+test('background warn: context tiles only when red (>=80), amber stays plain', () => {
+  const amber = bgOf('warn', usage(10, 10), { contextPct: 79 });
+  assert.ok(!amber.includes('48;5'));
+  assert.ok(amber.includes(`${E('38;5;214')}▰▰▰▰▰▰▰▰▱▱ 79%${R}`));
+  const red = bgOf('warn', usage(10, 10), { contextPct: 80 });
+  assert.ok(red.includes(`${E('38;5;255;48;5;160')} 🧠 ▰▰▰▰▰▰▰▰▱▱ 80% ${R}`), red);
+});
+
+test('background tiles: own background per segment, no separators, inner resets re-apply the tile', () => {
+  const out = bgOf('tiles', usage(84, 25), { paths: [{ kind: 'project', name: 'proj', dir: '/p' }, { kind: 'scratch', name: 'sc', dir: '/s' }] });
+  const t = (n) => `38;5;255;48;5;${n}`;
+  assert.ok(out.startsWith(`${E(t(54))} 🤖 M ${R}${E(t(23))} 🧠 `));
+  assert.ok(out.includes(`${E(t(23))} 🧠 ${E('38;5;114')}▰▰▰▱▱▱▱▱▱▱ 30%${R}${E(t(23))} ${R}`)); // tile SGR re-applied after inner reset
+  assert.ok(out.includes(`${E(t(58))} ⏳ ${E('38;5;245')}5h${R}${E(t(58))} ${E('38;5;214')}84%↑${R}${E(t(58))} 12:00 ${R}`));
+  assert.ok(out.includes(`${E(t(94))} 📅 `));
+  assert.ok(out.endsWith(`${E(t(24))} 🏠 proj ${R}${E(t(236))} 📁 sc ${R}`));
+  assert.ok(!strip(out).includes('│'));
+});
+
+test('background tiles: projection and worktree use 238', () => {
+  const out = bgOf('tiles', usage(10, 10), { projectionDisplay: 'on', projection: { minutes: 100, threshold: 90 }, paths: [{ kind: 'worktree', name: 'wt', dir: '/w' }] });
+  assert.ok(out.includes(`${E('38;5;255;48;5;238')} 📈 ~1h40m to 90% ${R}`));
+  assert.ok(out.endsWith(`${E('38;5;255;48;5;238')} 🔀 wt ${R}`));
+});
+
+test('background tiles: OSC 8 link stays inside the tile', () => {
+  const tier = full({ FORCE_HYPERLINK: '1' });
+  const out = bgOf('tiles', usage(10, 10), { tier, paths: [{ kind: 'project', name: 'proj', dir: process.platform === 'win32' ? 'C:\\p' : '/p' }] });
+  assert.match(out, /\x1b\[38;5;255;48;5;24m \x1b\]8;;file:[^\x07]*\x07🏠 proj\x1b\]8;;\x07 \x1b\[0m$/); // eslint-disable-line no-control-regex
+});
+
+test('background bar: whole line on 236, separators kept, padded to COLUMNS (emoji = 2 cells)', () => {
+  const plain = '🤖 M │ 🧠 ▰▰▰▱▱▱▱▱▱▱ 30% │ ⏳ 5h 10% 12:00 │ 📅 7d 10% Wed 10:00';
+  assert.equal(strip(bgOf('bar', usage(10, 10), { columns: '' })), plain); // no usable width: no padding
+  const out = bgOf('bar', usage(10, 10), { columns: 80 });
+  assert.ok(out.startsWith(E('48;5;236')) && out.endsWith(R));
+  assert.equal(cells(out), 80);
+  assert.ok(out.includes(`${R}${E('48;5;236')} │ `)); // inner reset re-applies the bar
+  assert.equal(strip(bgOf('bar', usage(10, 10), { columns: 10 })), plain); // narrower than the line: never truncated
+});
+
+test('background bar: reads process.env.COLUMNS', () => {
+  const prev = process.env.COLUMNS;
+  process.env.COLUMNS = '70';
+  try {
+    assert.equal(cells(bgOf('bar')), 70);
+  } finally {
+    if (prev === undefined) delete process.env.COLUMNS; else process.env.COLUMNS = prev;
+  }
+});
+
+test('background: basic tier uses 16-color codes only', () => {
+  const tier = resolveTier('basic', {}, 'linux');
+  const g = { tier, glyphs: GLYPHS.ascii, model: 'M', contextPct: 85 };
+  const warn = compact(usage(84, 96), { ...g, background: 'warn' });
+  assert.ok(warn.includes(`${E('30;43')} 5h 84%↑ 12:00 ${R}`), warn);
+  assert.ok(warn.includes(`${E('97;41')} 7d 96%↑ Wed 10:00 ${R}`));
+  assert.ok(warn.includes(`${E('97;41')} █████████░ 85% ${R}`));
+  const tiles = compact(usage(10, 10), { ...g, contextPct: 30, background: 'tiles' });
+  assert.ok(tiles.startsWith(`${E('97;100')} M ${R}${E('97;100')} `));
+  const bar = compact(usage(10, 10), { ...g, contextPct: 30, background: 'bar', columns: 60 });
+  assert.ok(bar.startsWith(E('97;100')));
+  assert.equal([...strip(bar)].length, 60);
+  for (const out of [warn, tiles, bar]) assert.ok(!out.includes('38;5') && !out.includes('48;5'));
+});
+
+test('background: ascii tier bar pads to COLUMNS', () => {
+  const tier = resolveTier('ascii', {}, 'win32');
+  const out = compact(usage(10, 10), { tier, glyphs: GLYPHS.ascii, model: 'M', background: 'bar', columns: 50 });
+  assert.equal([...strip(out)].length, 50);
+});
+
+test('background: NO_COLOR drops every SGR and tile padding in every mode', () => {
+  const tier = resolveTier('auto', { WT_SESSION: 'a', NO_COLOR: '1', FORCE_HYPERLINK: '0' }, 'win32');
+  const base = strip(compact(usage(96, 96), { tier, background: 'off', model: 'M', contextPct: 90 }));
+  for (const background of ['bar', 'tiles', 'warn']) {
+    const out = compact(usage(96, 96), { tier, background, model: 'M', contextPct: 90, columns: 200 });
+    assert.equal(out, base, background);
+  }
+});
+
+test('background: classic layout is unaffected', () => {
+  const base = { now: NOW, locale: 'en-US', hour12: false, timeZone: 'UTC', glyphs: GLYPHS.emoji, warnBand: 80 };
+  const u = usage(96, 25);
+  assert.equal(
+    formatStatusLine(u, 95, ['five_hour', 'seven_day'], { ...base, background: 'tiles', columns: 80 }),
+    formatStatusLine(u, 95, ['five_hour', 'seven_day'], base),
+  );
+});

@@ -451,3 +451,10 @@ test('loadConfig: barStyle defaults to pill, reads env, invalid falls back', () 
   assert.equal(loadConfig('/proj', readThrows, { CLAUDE_PLUGIN_OPTION_BAR_STYLE: 'smooth' }).barStyle, 'smooth');
   assert.equal(loadConfig('/proj', () => JSON.stringify({ barStyle: 'zigzag' }), noEnv).barStyle, 'pill');
 });
+
+test('loadConfig: background defaults to warn, reads env, invalid falls back', () => {
+  const readThrows = () => { throw new Error('ENOENT'); };
+  assert.equal(loadConfig('/proj', readThrows, noEnv).background, 'warn');
+  assert.equal(loadConfig('/proj', readThrows, { CLAUDE_PLUGIN_OPTION_BACKGROUND: 'tiles' }).background, 'tiles');
+  assert.equal(loadConfig('/proj', () => JSON.stringify({ background: 'neon' }), noEnv).background, 'warn');
+});

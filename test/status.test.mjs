@@ -197,7 +197,7 @@ test('renderStatus (en): no history -> no-data wording', () => {
 test('renderStatus: shows the v0.13 compact-layout options', () => {
   const out = renderStatus(
     { threshold: 90, watch: ['five_hour'], locale: 'en-US', layout: 'compact', windowDisplay: 'nearest',
-      showModel: true, showContext: false, paceArrow: true, showPaths: false, scratchDir: '', barStyle: 'dot' },
+      showModel: true, showContext: false, paceArrow: true, showPaths: false, scratchDir: '', barStyle: 'dot', background: 'tiles' },
     { tokenPresent: true, cacheAgeMs: null, statusLineWired: true },
   );
   assert.match(out, /layout.*compact/);
@@ -205,6 +205,7 @@ test('renderStatus: shows the v0.13 compact-layout options', () => {
   assert.match(out, /showContext.*false/);
   assert.match(out, /scratchDir.*-/);
   assert.match(out, /barStyle.*dot/);
+  assert.match(out, /background.*tiles/);
 });
 
 test('renderStatus: shows legend mode on/off', () => {

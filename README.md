@@ -156,6 +156,7 @@ Settings you can change **directly in Claude Code** via `/config` (under this pl
 | `window_display` | enum | `all` | `all` shows every watched window; `nearest` only the one closest to its threshold. |
 | `show_paths` | bool | `true` | Show project, worktree and scratch folder segments. |
 | `scratch_dir` | string | `""` | Folder for the scratch segment (relative to the project). Empty = Claude Code's built-in scratchpad. |
+| `background` | enum | `warn` | Compact status line backgrounds: `off`, `bar` (whole line on a dark bar, padded to `COLUMNS` when set), `tiles` (every segment its own background, no separators) or `warn` (a limit in the amber or red band gets a black-on-amber / white-on-red tile; context only when red, ≥80 %). 16-color equivalents in the basic and ascii tiers; none under `NO_COLOR`; classic layout unaffected. |
 | `bar_style` | enum | `pill` | Context bar glyphs: `pill`, `block`, `shade`, `square`, `dot`, `rect`, `line`, `braille` or `smooth`. Falls back to `block` in terminals without the glyphs. |
 | `notifications` | enum | `off` | When `on`, pops up an OS notification once when a window enters the warn band or crosses the threshold (macOS/Linux/Windows, best-effort). |
 

@@ -140,3 +140,9 @@ test('coerceOptionValue: bar_style enum and boolean error text', () => {
   assert.throws(() => coerceOptionValue('show_model', 'maybe'), /true, false, on, off/);
   assert.equal(CONFIG_OPTIONS.bar_style.projectKey, 'barStyle');
 });
+
+test('coerceOptionValue: background enum', () => {
+  assert.equal(coerceOptionValue('background', 'bar'), 'bar');
+  assert.throws(() => coerceOptionValue('background', 'neon'), /off, bar, tiles, warn/);
+  assert.equal(CONFIG_OPTIONS.background.projectKey, 'background');
+});

@@ -92,6 +92,12 @@
       "description": "Glyphs of the context bar: pill, block, shade, square, dot, rect, line, braille or smooth. Default pill (falls back to block in terminals without the glyphs).",
       "default": "pill"
     },
+    "background": {
+      "type": "string",
+      "title": "Status line background",
+      "description": "off, bar (whole line on a dark bar), tiles (every segment its own background) or warn (amber/red tile behind a limit that is in the warning band, red context). Default warn. No colors under NO_COLOR.",
+      "default": "warn"
+    },
     "window_display": {
       "type": "string",
       "title": "Window display",

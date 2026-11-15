@@ -34,6 +34,7 @@ export function renderStatus(cfg, health) {
     `  layout: ${cfg.layout ?? '-'}`,
     `  legend: ${health.legendOn ? 'on' : 'off'}`,
     `  barStyle: ${cfg.barStyle ?? '-'}`,
+    `  background: ${cfg.background ?? '-'}`,
     `  windowDisplay: ${cfg.windowDisplay ?? '-'}`,
     `  showModel: ${cfg.showModel ?? '-'}`,
     `  showContext: ${cfg.showContext ?? '-'}`,

@@ -6,12 +6,16 @@
   bar, every watched limit window (short label, colored percentage, reset time), the optional
   projection, and the project, worktree and scratch folder. New options `layout` (`compact` /
   `classic`), `show_model`, `show_context`, `pace_arrow`, `window_display` (`all` / `nearest`),
-  `show_paths`, `scratch_dir` and `bar_style`; `layout: classic` keeps the v0.12 line exactly, and the
+  `show_paths`, `scratch_dir`, `bar_style` and `background`; `layout: classic` keeps the v0.12 line exactly, and the
   `--context` text injected into Claude is unchanged.
 - **Added: icons on every segment (full tier only).** `🤖` model, `🧠` context bar, `⏳` 5h window, `📅` 7d
   windows, next to the existing `📈` / `🏠` / `🔀` / `📁`; icons are never colored and the basic/ascii
   tiers stay icon-free. The band legend is now one line per part (`<icon> <name> – <meaning>`) with the
   color samples drawn in real theme colors (green / amber / red) and the rest dim.
+- **Added: `background` option** (`off` / `bar` / `tiles` / `warn`, default `warn`). `warn` puts an amber
+  or red tile behind a limit window in the warning band (context only when red, ≥80 %); `tiles` gives every
+  segment its own background; `bar` puts the whole line on a dark bar padded to `COLUMNS`. 16-color
+  equivalents in the basic/ascii tiers, no backgrounds under `NO_COLOR`, classic layout unchanged.
 - **Added: pace arrow.** `↑` (`^` in ascii) after a window's percentage when usage is at least 10
   points ahead of the elapsed window time.
 - **Added: terminal tiers.** `style` now accepts `basic` besides `auto` / `emoji` / `ascii`
