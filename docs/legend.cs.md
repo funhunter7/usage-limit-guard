@@ -3,7 +3,7 @@
 Ukázka řádku (kompaktní rozvržení, terminál úrovně „full"):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% st 09:00 │ my-project │ 🌿 rule-fixes │ 📁 scratchpad
+Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% st 09:00 │ my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
 Každou část můžeš vypnout v nastavení (`show_model`, `show_context`, `pace_arrow`, `show_paths`, `window_display`).
@@ -59,7 +59,7 @@ Název složky projektu (`workspace.project_dir`). Kliknutím ji otevřeš tam, 
 <a id="worktree"></a>
 ## Worktree
 
-`🌿 název`: zobrazí se jen v relaci běžící v propojeném git worktree. Kliknutím otevřeš složku worktree.
+`🔀 název`: zobrazí se jen v relaci běžící v propojeném git worktree. Kliknutím otevřeš složku worktree.
 
 <a id="odkladaci-slozka"></a>
 ## Odkládací složka
@@ -73,7 +73,7 @@ Vzhled se řídí tím, co tvůj terminál umí vykreslit (`style: auto`, nebo v
 
 | Úroveň | Kde | Vzhled |
 |--------|-----|--------|
-| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 barev, pruh `▰▱`, oddělovač `│`, `🌿`/`📁`, odkazy |
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 barev, pruh `▰▱`, oddělovač `│`, `🔀`/`📁`, odkazy |
 | basic | tmux/screen, JetBrains, Konsole, Terminal.app, ostatní unixové terminály | 16 barev, pruh `█░`, `│`, bez emoji, bez odkazů |
 | ascii | starší konzole Windows (cmd/PowerShell), `TERM=dumb` | 16 barev, pruh `[####------]`, `\|`, šipka `^`, bez odkazů |
 

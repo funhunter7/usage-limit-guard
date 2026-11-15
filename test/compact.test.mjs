@@ -104,7 +104,7 @@ test('compact ascii tier: [####------] bar, pipe separator, ^ arrow', () => {
 
 test('compact full tier: emoji prefixes for worktree/scratch', () => {
   const out = strip(compact(usage(10, 10), { paths: [{ kind: 'worktree', name: 'rule-fixes', dir: '/w' }, { kind: 'scratch', name: 'scratchpad', dir: '/s' }] }));
-  assert.match(out, /│ 🌿 rule-fixes │ 📁 scratchpad$/);
+  assert.match(out, /│ 🔀 rule-fixes │ 📁 scratchpad$/);
 });
 
 test('compact: NO_COLOR strips every SGR sequence', () => {

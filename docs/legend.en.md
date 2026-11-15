@@ -3,7 +3,7 @@
 Sample line (compact layout, terminal tier "full"):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ my-project │ 🌿 rule-fixes │ 📁 scratchpad
+Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
 Each segment can be turned off in the options (`show_model`, `show_context`, `pace_arrow`, `show_paths`, `window_display`).
@@ -61,7 +61,7 @@ The name of the project folder (`workspace.project_dir`). Click to open it where
 <a id="worktree"></a>
 ## Worktree
 
-`🌿 name`: shown only when the session runs in a linked git worktree. Click to open the worktree folder.
+`🔀 name`: shown only when the session runs in a linked git worktree. Click to open the worktree folder.
 
 <a id="scratch-folder"></a>
 ## Scratch folder
@@ -75,7 +75,7 @@ The look follows what your terminal can draw (`style: auto`, or force `emoji` = 
 
 | Tier | Where | Look |
 |------|-------|------|
-| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 colors, `▰▱` bar, `│` separator, `🌿`/`📁`, links |
+| full | Windows Terminal, iTerm2, WezTerm, VS Code, Kitty, Alacritty, ... | 256 colors, `▰▱` bar, `│` separator, `🔀`/`📁`, links |
 | basic | tmux/screen, JetBrains, Konsole, Terminal.app, other Unix terminals | 16 colors, `█░` bar, `│`, no emoji, no links |
 | ascii | legacy Windows console (cmd/PowerShell host), `TERM=dumb` | 16 colors, `[####------]` bar, `\|`, `^` arrow, no links |
 
