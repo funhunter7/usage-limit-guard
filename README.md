@@ -210,7 +210,7 @@ project to override these settings for that project only.
 The default `compact` layout puts the most useful facts on one line (colors and links where your terminal supports them):
 
 ```text
-Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ my-project │ 🔀 rule-fixes │ 📁 scratchpad
+Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 20:08 │ 7d 25% Wed 09:00 │ 🏠 my-project │ 🔀 rule-fixes │ 📁 scratchpad
 ```
 
 Model, context-window bar (green below 50 %, amber below 80 %, red above), each watched limit
@@ -246,7 +246,7 @@ redraws on a press, the block appears and disappears instantly.
 ```text
 Opus 5.5 = model · ▰▱ 42% = context window (green <50%, yellow <80%, then red)
 5h = session limit · 7d = weekly limit · ↑ = usage runs ahead of time · time = when the limit resets
-name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder
+🏠 name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder
 ```
 
 Switch it with the button (hotkey `l` while the band has focus; needs Claude Code 2.1.287 or newer,

@@ -435,7 +435,7 @@ const compactDeps = (extra = {}) => {
 
 test('--statusline compact: model, context bar, short-label windows, project', async () => {
   const out = await runCli('--statusline', '/proj', compactDeps());
-  assert.equal(out, 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 72%↑ 06:00 │ 7d 39% Wed 10:00 │ proj');
+  assert.equal(out, 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 72%↑ 06:00 │ 7d 39% Wed 10:00 │ 🏠 proj');
 });
 
 test('--statusline compact: show_* toggles and layout classic', async () => {

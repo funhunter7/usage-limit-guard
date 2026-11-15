@@ -80,7 +80,7 @@ test('resolveTier: bar glyph set and OSC 8 links gating', () => {
 
 test('compact full tier: target look with colors, pill bar, separators', () => {
   const out = compact(usage(84, 25), { model: 'Opus 5.5', contextPct: 42, paths: [{ kind: 'project', name: 'proj', dir: '/p' }] });
-  assert.equal(strip(out), 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 12:00 │ 7d 25% Wed 10:00 │ proj');
+  assert.equal(strip(out), 'Opus 5.5 │ ▰▰▰▰▱▱▱▱▱▱ 42% │ 5h 84%↑ 12:00 │ 7d 25% Wed 10:00 │ 🏠 proj');
   assert.ok(out.includes(`${ESC}[38;5;114m▰▰▰▰▱▱▱▱▱▱ 42%${ESC}[0m`)); // green context
   assert.ok(out.includes(`${ESC}[38;5;245m5h${ESC}[0m`)); // dim label
   assert.ok(out.includes(`${ESC}[38;5;214m84%↑${ESC}[0m`)); // amber band
@@ -160,21 +160,21 @@ test('compact: missing segments are omitted, no usage keeps classic fallbacks', 
 
 test('compact: projection segment follows the windows when on', () => {
   const out = strip(compact(usage(10, 10), { projectionDisplay: 'on', projection: { minutes: 100, threshold: 90 }, paths: [{ kind: 'project', name: 'p', dir: '/p' }] }));
-  assert.match(out, /Wed 10:00 │ 📈 ~1h40m to 90% │ p$/);
+  assert.match(out, /Wed 10:00 │ 📈 ~1h40m to 90% │ 🏠 p$/);
 });
 
 test('compact: OSC 8 links use BEL terminator and file URL when enabled', () => {
   const dir = tmpdir();
   const tier = resolveTier('auto', { TERM_PROGRAM: 'vscode' }, 'win32');
   const out = compact(usage(10, 10), { tier, paths: [{ kind: 'project', name: 'p', dir }] });
-  assert.ok(out.endsWith(`${ESC}]8;;${pathToFileURL(dir).href}\x07p${ESC}]8;;\x07`));
+  assert.ok(out.endsWith(`${ESC}]8;;${pathToFileURL(dir).href}\x07🏠 p${ESC}]8;;\x07`));
   const off = compact(usage(10, 10), { paths: [{ kind: 'project', name: 'p', dir }] }); // WT w/o FORCE_HYPERLINK=1
   assert.ok(!off.includes(']8;;'));
 });
 
 test('compact: path segments keep their folder links, no other links', () => {
   const out = compact(usage(10, 10), { tier: resolveTier('auto', { TERM_PROGRAM: 'vscode' }, 'win32'), model: 'M', contextPct: 42, paths: [{ kind: 'project', name: 'p', dir: tmpdir() }] });
-  assert.ok(out.endsWith(`${ESC}]8;;${pathToFileURL(tmpdir()).href}\x07p${ESC}]8;;\x07`));
+  assert.ok(out.endsWith(`${ESC}]8;;${pathToFileURL(tmpdir()).href}\x07🏠 p${ESC}]8;;\x07`));
 });
 
 test('compact: control characters in names cannot inject escapes', () => {
@@ -324,7 +324,7 @@ test('compact: nearest ties pick the first watched key; single key; missing-data
 test('compact: bidi/zero-width/line-separator characters are stripped (U+202E)', () => {
   const out = compact(usage(10, 10), { model: 'A\u202EB\u200BC\u2028D', paths: [{ kind: 'project', name: 'x\u202Ey', dir: null }] });
   assert.ok(strip(out).startsWith('ABCD │'));
-  assert.ok(out.endsWith('│ xy'));
+  assert.ok(out.endsWith('│ 🏠 xy'));
 });
 
 test('compact: relative dirs are not linked', () => {
@@ -335,7 +335,7 @@ test('compact: relative dirs are not linked', () => {
 test('compact: Windows path with a space becomes a percent-encoded file URL', { skip: process.platform !== 'win32' }, () => {
   const tier = resolveTier('auto', { TERM_PROGRAM: 'vscode' }, 'win32');
   const out = compact(usage(10, 10), { tier, paths: [{ kind: 'project', name: 'proj', dir: 'C:\\Users\\a b\\proj' }] });
-  assert.ok(out.includes(`${ESC}]8;;file:///C:/Users/a%20b/proj\x07proj`));
+  assert.ok(out.includes(`${ESC}]8;;file:///C:/Users/a%20b/proj\x07🏠 proj`));
 });
 
 test('classic layout: short labels + both resets + projection equals the v0.12 line', () => {

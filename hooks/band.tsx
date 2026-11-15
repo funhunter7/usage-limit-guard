@@ -36,12 +36,12 @@ const LEGEND = {
   cs: [
     'Opus 5.5 = model · ▰▱ 42% = paměť konverzace (zelená <50 %, žlutá <80 %, pak červená)',
     '5h = limit relace · 7d = týdenní limit · ↑ = spotřeba předbíhá čas · čas = kdy se limit obnoví',
-    'název = projekt (klik otevře složku) · 🔀 = worktree · 📁 = odkládací složka',
+    '🏠 název = projekt (klik otevře složku) · 🔀 = worktree · 📁 = odkládací složka',
   ],
   en: [
     'Opus 5.5 = model · ▰▱ 42% = context window (green <50%, yellow <80%, then red)',
     '5h = session limit · 7d = weekly limit · ↑ = usage runs ahead of time · time = when the limit resets',
-    'name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder',
+    '🏠 🏠 name = project (click opens the folder) · 🔀 = worktree · 📁 = scratch folder',
   ],
 }
 
