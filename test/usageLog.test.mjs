@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { appendUsage, readUsageLog, summarize } from '../lib/usageLog.mjs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { appendUsage, readUsageLog, summarize, usageLogPath } from '../lib/usageLog.mjs';
 
 const BASE = 1_700_000_000_000;
 const DAY = 24 * 60 * 60 * 1000;
@@ -85,4 +87,9 @@ test('summarize: empty -> zeros/nulls', () => {
   assert.equal(s.peakFiveHour, null);
   assert.equal(s.peakSevenDay, null);
   assert.equal(s.resets, 0);
+});
+
+test('usageLogPath: honors CLAUDE_CONFIG_DIR, else ~/.claude', () => {
+  assert.equal(usageLogPath({ CLAUDE_CONFIG_DIR: '/cfg' }), join('/cfg', 'claude-limit-guard-usage.jsonl'));
+  assert.equal(usageLogPath({}), join(homedir(), '.claude', 'claude-limit-guard-usage.jsonl'));
 });

@@ -69,3 +69,8 @@ test('readGlobalOptions: reads options under the env-overridden key', () => {
   const out = readGlobalOptions({ ...ENV, CLAUDE_LIMIT_GUARD_PLUGIN_KEY: 'other@key' }, readFrom(raw));
   assert.deepEqual(out, { locale: 'cs-CZ' });
 });
+
+test('readGlobalOptions: a UTF-8 BOM before the JSON does not drop all options', () => {
+  const raw = String.fromCharCode(0xFEFF) + JSON.stringify({ pluginConfigs: { [PLUGIN_KEY]: { options: { threshold: 70 } } } });
+  assert.deepEqual(readGlobalOptions(ENV, readFrom(raw)), { threshold: 70 });
+});

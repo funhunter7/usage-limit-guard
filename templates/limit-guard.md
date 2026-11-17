@@ -1,13 +1,13 @@
-# Limit-guard instrukce pro tento projekt
+# Limit-guard instructions for this project
 
-Když claude-limit-guard ohlásí překročení prahu, proveď v tomto pořadí:
+When claude-limit-guard reports the threshold was crossed, do this in order:
 
-1. Dokonči rozdělaný atomický krok — nenech žádnou poloviční editaci.
-2. Zapiš/aktualizuj handoff (`.claude/RESUME.md`): co je hotové, co zbývá,
-   aktuální git větev, dosud změněné soubory, konkrétní další krok pro
-   navázání, čas resetu limitu.
-3. (Volitelné) Pokud jsme v git repu, commitni rozdělanou práci do větve.
-4. Oznam mi, že práce je uložená a můžu vypnout PC.
-5. Přestaň brát nové úkoly do resetu limitu.
+1. Finish the atomic step in progress — leave no half-done edit.
+2. Write/update the handoff (`.claude/RESUME.md`): what is done, what remains,
+   the current git branch, the files changed so far, the concrete next step to
+   resume, and the time the limit resets.
+3. (Optional) If this is a git repo, commit the work in progress to a branch.
+4. Tell me the work is saved and I can shut down the PC.
+5. Stop taking new tasks until the limit resets.
 
-<!-- Uprav tento postup podle povahy projektu. -->
+<!-- Adapt this procedure to the nature of the project. A Czech version is in limit-guard.cs.md. -->

@@ -5,6 +5,7 @@ import {
   clearProjectOption,
   setGlobalOption,
   clearGlobalOption,
+  readValueFromStdin,
 } from '../lib/guardConfig.mjs';
 
 // Usage:
@@ -19,13 +20,16 @@ function parseArgs(argv) {
     if (a === '--scope') out.scope = argv[++i];
     else if (a === '--option') out.option = argv[++i];
     else if (a === '--value') out.value = argv[++i];
+    else if (a === '--value-stdin') out.valueStdin = true; // free text via a quoted heredoc, no shell quoting
     else if (a === '--clear') out.clear = true;
   }
   return out;
 }
 
 function main() {
-  const { scope, option, value, clear } = parseArgs(process.argv.slice(2));
+  const args = parseArgs(process.argv.slice(2));
+  const { scope, option, clear } = args;
+  const value = args.valueStdin ? readValueFromStdin() : args.value;
   if (!['project', 'global'].includes(scope)) throw new Error('--scope must be project|global');
   const def = CONFIG_OPTIONS[option];
   if (!def) throw new Error(`--option must be one of: ${Object.keys(CONFIG_OPTIONS).join(', ')}`);

@@ -53,7 +53,7 @@ when it resets — a same-day reset shows just the time, a later one adds the we
 ## Requirements
 
 - Node.js ≥ 18 on `PATH`
-- A logged-in Claude Code (reads `~/.claude/.credentials.json`)
+- A logged-in Claude Code. The status line uses the `rate_limits` Claude Code passes it natively; the OAuth fallback reads `~/.claude/.credentials.json`, which exists on Linux and Windows only. On macOS Claude Code keeps the login in the Keychain ([docs](https://code.claude.com/docs/en/authentication#credential-management)), so there the plugin relies on the native `rate_limits` alone (no OAuth fallback).
 
 ## Install
 
@@ -113,11 +113,11 @@ plugin makes no network call until a window's reset time has actually passed.)
 | **`/limit-guard-status`** | Print the resolved config plus a health snapshot — token, status-line cache age, whether the status line is wired, and burn-rate history readings. |
 | **`/limit-guard-stats`** | Summarize recent usage from the rolling ~7-day log: number of readings, peak 5h/7d utilization, and reset count. |
 | **`/limit-guard-doctor`** | Run a self-check — Node version, OAuth token, whether the status line is wired, cache freshness, and installed-vs-latest plugin version — with a fix hint for anything failing. |
-| **`/limit-guard-setup`** | Auto-wire the status line into `~/.claude/settings.json` (backing up the previous file first), including `refreshInterval: 60` so it stays current while idle. Idempotent — a no-op when it's already wired; re-run it to add `refreshInterval` to an older wiring. In Windows Terminal it also offers to set `FORCE_HYPERLINK=1` so the status line links are clickable. |
+| **`/limit-guard-setup`** | Auto-wire the status line into `~/.claude/settings.json` (backing up the previous file first; it points at the marketplace clone, which survives plugin updates, rather than the versioned cache folder Claude Code deletes some days after an update), including `refreshInterval: 60` so it stays current while idle. Idempotent — a no-op when it's already wired; re-run it to add `refreshInterval` to an older wiring. In Windows Terminal it also offers to set `FORCE_HYPERLINK=1` so the status line links are clickable. |
 | **`/limit-guard-legend`** | Explain every status line item (model, context bar, limits, pace arrow, projection, paths) with samples in your terminal's glyph set. See also [docs/legend.en.md](docs/legend.en.md). `/limit-guard-legend on` / `off` switches [legend mode](#legend-mode) (a block in the band above the prompt). |
 | **`/limit-guard-snooze`** | Temporarily pause the guard's stop/handoff directives until the next reset (`/limit-guard-snooze clear` cancels early). The status line and notifications keep working. |
 
-Both write through a validated helper that preserves your other settings.
+The commands that write settings go through a validated helper that preserves your other settings (the global `settings.json` is backed up to `settings.json.bak-limitguard` and written atomically).
 
 <!-- Awesome badge: flip on once accepted into an Awesome list.
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
@@ -180,8 +180,10 @@ These follow your environment, so `/config` doesn't prompt for them. Override on
   {
     "pluginConfigs": {
       "claude-limit-guard@claude-limit-guard": {
-        "threshold": 90,
-        "guard_action": "Save a handoff to RESUME.md and stop."
+        "options": {
+          "threshold": 90,
+          "guard_action": "Save a handoff to RESUME.md and stop."
+        }
       }
     }
   }
@@ -190,8 +192,9 @@ These follow your environment, so `/config` doesn't prompt for them. Override on
 
 ### Per-project override
 
-Drop `.claude/limit-guard.json` and `.claude/limit-guard.md` (copy from `templates/`) into a
-project to override these settings for that project only.
+Drop `.claude/limit-guard.json` and `.claude/limit-guard.md` (copy from `templates/`; `limit-guard.md` is
+English, `limit-guard.cs.md` the Czech version) into a project to override these settings for that
+project only. The project root is used (not a subfolder Claude has `cd`'d into).
 
 ### Precedence (most specific wins)
 
@@ -249,7 +252,7 @@ redraws on a press, the block appears and disappears instantly.
 🧠 conversation memory – up to 50% · up to 80% · more; when it runs out, Claude forgets details
 ⏳ session limit (5h) – usage of the 5-hour window, time = when it resets
 📅 weekly limit (7d) – usage of the weekly window
-number color: fine · careful (from 80%) · threshold crossed
+number color: fine · careful (warn band) · threshold crossed
 ↑ – usage runs ahead of time by 10+ points
 📈 – estimate of when the limit runs out (only when enabled)
 🏠 project – click to open the folder
@@ -303,10 +306,18 @@ Two environment variables help when the reading looks wrong:
 ## Development
 
 ```bash
-npm test          # node --test (193 tests)
+npm test          # node --test (500+ tests)
 npm run lint      # eslint .
 npm run check     # lint + test
+npm run test:mod  # band mod tests (hooks/band.test.tsx) via `claude plugin test .`
 ```
+
+`npm test` does not run the `.tsx` mod tests and CI does not either (it has no `claude` binary); run
+`npm run test:mod` locally after touching `hooks/band.tsx`.
+
+`tsconfig.json` extends `.claude-plugin/types/tsconfig.json`, a git-ignored file of Claude Code mod typings
+that is generated locally, not committed. On a fresh clone it is absent, so an editor may report an unresolved
+`extends` and miss type hints for `hooks/band.tsx`; tests, lint and `npm run test:mod` do not need it.
 
 Tests pin `TZ=Europe/Prague` for deterministic wall-clock formatting; CI runs them on Node
 18/20/22 and lints on Node 22.

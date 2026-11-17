@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderDoctor } from '../bin/doctor.mjs';
+import { renderDoctor, isNewerVersion } from '../bin/doctor.mjs';
 
 test('renderDoctor: ok checks show check mark, bad checks show cross + hint', () => {
   const out = renderDoctor([
@@ -30,4 +30,14 @@ test('renderDoctor: info line shows the info marker, not a cross, and no hint', 
   const out = renderDoctor([{ key: 'hyperlink', info: true, ok: true }], { locale: 'en-US' });
   assert.match(out, /ℹ️.*FORCE_HYPERLINK=1/);
   assert.doesNotMatch(out, /❌|✅/);
+});
+
+test('isNewerVersion: numeric compare; ahead-of-release or garbage is not a failure', () => {
+  assert.equal(isNewerVersion('v0.13.1', '0.13.0'), true);
+  assert.equal(isNewerVersion('v0.14.0', '0.13.9'), true);
+  assert.equal(isNewerVersion('v0.12.0', '0.13.0'), false); // local ahead of the latest release
+  assert.equal(isNewerVersion('v0.13.0', '0.13.0'), false);
+  assert.equal(isNewerVersion('v0.9.0', '0.10.0'), false); // not a string compare
+  assert.equal(isNewerVersion('nightly', '0.13.0'), false);
+  assert.equal(isNewerVersion('v0.13.0', null), false);
 });

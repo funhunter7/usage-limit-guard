@@ -31,16 +31,30 @@ test('parseStdin: extracts cwd and rate_limits together', () => {
   assert.deepEqual(parseStdin(raw, '/fb'), {
     cwd: '/ws',
     rateLimits: { five_hour: { used_percentage: 12, resets_at: 1738425600 } },
+    sessionId: '',
+    stopHookActive: false,
   });
 });
 
 test('parseStdin: no rate_limits -> rateLimits undefined, cwd resolved', () => {
   assert.deepEqual(parseStdin(JSON.stringify({ cwd: '/here' }), '/fb'),
-    { cwd: '/here', rateLimits: undefined });
+    { cwd: '/here', rateLimits: undefined, sessionId: '', stopHookActive: false });
 });
 
 test('parseStdin: invalid JSON -> fallback cwd, undefined rateLimits', () => {
-  assert.deepEqual(parseStdin('{ not json', '/fb'), { cwd: '/fb', rateLimits: undefined });
+  assert.deepEqual(parseStdin('{ not json', '/fb'), { cwd: '/fb', rateLimits: undefined, sessionId: '', stopHookActive: false });
+});
+
+test('parseStdin: project root wins over current_dir; hook env wins over cwd', () => {
+  assert.equal(parseStdin(JSON.stringify({ workspace: { project_dir: '/root', current_dir: '/root/sub' } }), '/fb').cwd, '/root');
+  assert.equal(parseStdin(JSON.stringify({ cwd: '/root/sub' }), '/fb', { CLAUDE_PROJECT_DIR: '/root' }).cwd, '/root');
+  assert.equal(parseStdin(JSON.stringify({ cwd: '/root/sub' }), '/fb', {}).cwd, '/root/sub');
+});
+
+test('parseStdin: reads session_id and stop_hook_active', () => {
+  const r = parseStdin(JSON.stringify({ session_id: 'S1', stop_hook_active: true }), '/fb');
+  assert.equal(r.sessionId, 'S1');
+  assert.equal(r.stopHookActive, true);
 });
 
 const SAMPLE = { five_hour: { utilization: 72, resets_at: '2026-05-31T06:00:00+02:00' },
@@ -49,7 +63,7 @@ const BREACH = { five_hour: { utilization: 96, resets_at: '2026-05-31T06:00:00+0
                  seven_day: { utilization: 39, resets_at: '2026-06-03T10:00:00+02:00' } };
 const NOW = new Date('2026-05-31T01:00:00+02:00');
 
-function deps(usage, { handoffExists = false, locale = 'en-US', guardAction = null, warnAction = null, warnBand = 80, timeFormat = '24', style = 'emoji', shouldBlockStop = () => true, stdinUsage = null, projectionDisplay = 'off', history = [], notifications = 'off', shouldNotify = () => true, snoozeUntil = () => null, watch = ['five_hour', 'seven_day'], threshold = 95, calls = {} } = {}) {
+function deps(usage, { handoffExists = false, locale = 'en-US', guardAction = null, warnAction = null, warnBand = 80, timeFormat = '24', style = 'emoji', shouldBlockStop = () => true, stdinUsage = null, projectionDisplay = 'off', history = [], notifications = 'off', shouldNotify = () => true, snoozeUntil = () => null, watch = ['five_hour', 'seven_day'], threshold = 95, calls = {}, sessionId = '', stopHookActive = false } = {}) {
   calls.getUsage = 0;
   calls.wrote = null;
   calls.appended = null;
@@ -71,6 +85,8 @@ function deps(usage, { handoffExists = false, locale = 'en-US', guardAction = nu
     getUsage: async () => { calls.getUsage += 1; return usage; },
     handoffExists: () => handoffExists,
     shouldBlockStop,
+    sessionId,
+    stopHookActive,
     now: () => NOW,
     stdinUsage,
     writeCache: (_p, data) => { calls.wrote = data; return true; },
@@ -195,6 +211,21 @@ test('--stop: window key is scoped to the project cwd', async () => {
   await runCli('--stop', '/projA', deps(BREACH, { handoffExists: false, shouldBlockStop: sb }));
   assert.match(seen, /^\/projA\|/);
   assert.match(seen, /2026-05-31T06:00:00/); // includes the breached limit's reset time
+});
+
+test('--stop: window key includes the session id', async () => {
+  let seen;
+  const sb = (k) => { seen = k; return true; };
+  await runCli('--stop', '/projA', deps(BREACH, { handoffExists: false, shouldBlockStop: sb, sessionId: 'S1' }));
+  assert.match(seen, /^\/projA\|S1\|/);
+});
+
+test('--stop: stop_hook_active (already continuing from a stop hook) -> no block, marker untouched', async () => {
+  let called = false;
+  const sb = () => { called = true; return true; };
+  const out = JSON.parse(await runCli('--stop', '/proj', deps(BREACH, { handoffExists: false, shouldBlockStop: sb, stopHookActive: true })));
+  assert.deepEqual(out, {});
+  assert.equal(called, false);
 });
 
 // Shape produced by usageFromRateLimits: utilization + resets_at as ms timestamps (not ISO strings).

@@ -1,5 +1,40 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed: Windows toasts never appeared.** `notifications: on` called `CreateToastNotifier` with an
+  unregistered AppUserModelID (`claude-limit-guard`), which Windows silently ignores
+  ([docs](https://learn.microsoft.com/windows/win32/shell/quickstart-sending-desktop-toast)). The toast now
+  uses the registered Windows PowerShell AUMID (`Get-StartApps` lists it). Not yet confirmed visually.
+- **Fixed: Stop guard could ping-pong between concurrent sessions.** The one-shot Stop marker held a single
+  key, so sessions in different projects re-blocked each other; it now keeps a bounded key list, the key
+  includes the session id, and a Stop already continuing because of a stop hook (`stop_hook_active`) is
+  never blocked again.
+- **Fixed: the status line could silently disappear after a plugin update.** `/limit-guard-setup` wired the
+  versioned plugin cache folder, which Claude Code deletes some days after an update. It now wires the
+  marketplace clone when present, and `/limit-guard-doctor` / `/limit-guard-status` report a wiring whose
+  script no longer exists as "not wired" (re-run `/limit-guard-setup`).
+- **Fixed: doctor false alarm.** The version check is numeric and only fails when a newer release exists
+  (a local version ahead of the latest GitHub release no longer shows a red cross).
+- **Fixed: project config and handoff are looked up at the project root** (`workspace.project_dir` /
+  `CLAUDE_PROJECT_DIR`), not the folder Claude `cd`'d into.
+- **Fixed: settings.json handling.** A UTF-8 BOM no longer makes the plugin ignore all options or refuse to
+  save; writes to the global `settings.json` are atomic (temp file + rename) and keep a
+  `settings.json.bak-limitguard` backup.
+- **Fixed: usage log honors `CLAUDE_CONFIG_DIR`** like the other config paths.
+- **Fixed: band legend** no longer claims the warning color starts at 80 % (it follows `warn_band`); the
+  `key` prop type error reported by `claude plugin validate` is gone.
+- **Changed: commands reply in the user's language** instead of forcing Czech; the AskUserQuestion
+  labels are English and translated by the model. `templates/limit-guard.md` is now English
+  (`limit-guard.cs.md` is the Czech version).
+- **Changed: safer free-text arguments.** `bin/guard.mjs` and `bin/config.mjs` accept `--value-stdin`; the
+  `/limit-guard-action` and `/limit-guard-config` commands pass the text through a quoted heredoc so quotes,
+  backticks and `$(...)` can no longer break the shell command. `/limit-guard-legend` only runs the literal
+  `on` / `off`.
+- **Docs/dev:** README fixes (test count, example nesting under `options`, macOS credentials note, dev notes
+  for the mod tests and the git-ignored typings), marketplace description, `npm run test:mod`
+  (`claude plugin test .`).
+
 ## 0.13.0 — 2026-11-15
 
 - **Added: compact status line (new default layout).** One line with the model, a context-window

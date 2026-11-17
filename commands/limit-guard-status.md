@@ -3,7 +3,7 @@ description: Show the resolved claude-limit-guard config and a health snapshot (
 allowed-tools: Bash
 ---
 
-Communicate with the user exclusively in Czech.
+Reply in the user's language (the language they write in); translate any option labels and explanations below into it.
 
 Run the diagnostic command and show its output to the user:
 

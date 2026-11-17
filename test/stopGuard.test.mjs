@@ -34,3 +34,26 @@ test('shouldBlockStop: unreadable marker -> block', () => {
   const fs = fakeFs(); // readFile throws (no data)
   assert.equal(shouldBlockStop('W1', fs), true);
 });
+
+test('shouldBlockStop: two interleaved keys (concurrent sessions) each block only once', () => {
+  const fs = fakeFs();
+  assert.equal(shouldBlockStop('A', fs), true);
+  assert.equal(shouldBlockStop('B', fs), true);
+  assert.equal(shouldBlockStop('A', fs), false);
+  assert.equal(shouldBlockStop('B', fs), false);
+});
+
+test('shouldBlockStop: marker is bounded to the 20 most recent keys', () => {
+  const fs = fakeFs();
+  for (let i = 0; i < 25; i++) shouldBlockStop(`K${i}`, fs);
+  const keys = JSON.parse(fs.store.data).keys;
+  assert.equal(keys.length, 20);
+  assert.equal(keys[19], 'K24');
+});
+
+test('shouldBlockStop: legacy single-window marker is still honoured', () => {
+  const fs = fakeFs();
+  fs.store.data = JSON.stringify({ window: 'OLD' });
+  assert.equal(shouldBlockStop('OLD', fs), false);
+  assert.equal(shouldBlockStop('NEW', fs), true);
+});

@@ -3,7 +3,7 @@ description: Show a summary of recent claude-limit-guard usage (peaks, resets) f
 allowed-tools: Bash
 ---
 
-Communicate with the user exclusively in Czech.
+Reply in the user's language (the language they write in); translate any option labels and explanations below into it.
 
 Run the stats command and show its output to the user:
 

@@ -28,6 +28,13 @@ test('notify: windows uses powershell with a toast script containing title + mes
   assert.match(joined, /5h at 90%/);
 });
 
+test('notify: windows toast uses the registered PowerShell AUMID, not an unregistered name', () => {
+  let seen;
+  notify('t', 'm', { platform: 'win32', run: (cmd, args) => { seen = args.join(' '); } });
+  assert.match(seen, /CreateToastNotifier\('\{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7\}\\WindowsPowerShell\\v1\.0\\powershell\.exe'\)/);
+  assert.doesNotMatch(seen, /CreateToastNotifier\('claude-limit-guard'\)/);
+});
+
 test('notify: runner failure never throws', () => {
   assert.doesNotThrow(() => notify('t', 'm', { platform: 'linux', run: () => { throw new Error('x'); } }));
 });

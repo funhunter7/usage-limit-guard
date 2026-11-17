@@ -41,7 +41,7 @@ const LEGEND: Record<'cs' | 'en', Part[][]> = {
     [['🧠 paměť konverzace – '], ['do 50 %', G], [' · '], ['do 80 %', Y], [' · '], ['víc', R], ['; když dojde, Claude zapomíná detaily']],
     [['⏳ limit relace (5h) – spotřeba 5hodinového okna, čas = kdy se obnoví']],
     [['📅 týdenní limit (7d) – spotřeba týdenního okna']],
-    [['barva čísla: '], ['v pořádku', G], [' · '], ['pozor (od 80 %)', Y], [' · '], ['práh překročen', R]],
+    [['barva čísla: '], ['v pořádku', G], [' · '], ['pozor (varovné pásmo)', Y], [' · '], ['práh překročen', R]],
     [['↑ – spotřeba předbíhá čas o 10+ bodů']],
     [['📈 – odhad, kdy limit dojde (jen když je zapnutý)']],
     [['🏠 projekt – kliknutím otevřeš složku']],
@@ -53,7 +53,7 @@ const LEGEND: Record<'cs' | 'en', Part[][]> = {
     [['🧠 conversation memory – '], ['up to 50%', G], [' · '], ['up to 80%', Y], [' · '], ['more', R], ['; when it runs out, Claude forgets details']],
     [['⏳ session limit (5h) – usage of the 5-hour window, time = when it resets']],
     [['📅 weekly limit (7d) – usage of the weekly window']],
-    [['number color: '], ['fine', G], [' · '], ['careful (from 80%)', Y], [' · '], ['threshold crossed', R]],
+    [['number color: '], ['fine', G], [' · '], ['careful (warn band)', Y], [' · '], ['threshold crossed', R]],
     [['↑ – usage runs ahead of time by 10+ points']],
     [['📈 – estimate of when the limit runs out (only when enabled)']],
     [['🏠 project – click to open the folder']],
@@ -89,7 +89,7 @@ export const register: Register = on => {
         </Box>
         {isOn && LEGEND[cs ? 'cs' : 'en'].map((line, i) => (
           <Text key={`legend-${i}`}>
-            {line.map(([text, color], j) => <Text key={j} color={color} dimColor={!color}>{text}</Text>)}
+            {line.map(([text, color], j) => <Text key={String(j)} color={color} dimColor={!color}>{text}</Text>)}
           </Text>
         ))}
       </Box>

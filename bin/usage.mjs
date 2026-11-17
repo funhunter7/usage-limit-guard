@@ -28,6 +28,10 @@ export async function runCli(mode, cwd, deps = {}) {
     // Already mapped to the internal usage shape via usageFromRateLimits — NOT the raw
     // rate_limits block. Passing raw rate_limits here would silently miss the fast-path.
     stdinUsage = null,
+    // Hook-only: session id (keeps concurrent sessions' stop markers apart) and whether Claude
+    // Code is already continuing because of a stop hook (then we must not block again).
+    sessionId = '',
+    stopHookActive = false,
     writeCache = defaultWriteCache,
     cachePath = CACHE_PATH,
     appendReading = defaultAppendReading,
@@ -208,15 +212,15 @@ export async function runCli(mode, cwd, deps = {}) {
   }
 
   if (mode === '--stop') {
-    if (snoozed) return '{}';
+    if (snoozed || stopHookActive) return '{}';
     // Loop prevention is the per-window shouldBlockStop marker alone — NOT the mere
     // existence of a handoff file. A long-lived/committed handoff (e.g. a dev RESUME.md)
     // must not permanently disable the guard; once the reset window rolls over we block
     // again and the guard action re-saves the handoff with the latest state.
     if (breached.length) {
-      // Scope the one-shot marker to this project so blocking in one project does not
+      // Scope the one-shot marker to this project and session so blocking in one does not
       // suppress the guard in another that breaches in the same reset window.
-      const windowKey = `${cwd}|${usage[breached[0]]?.resets_at || ''}`;
+      const windowKey = `${cwd}|${sessionId}|${usage[breached[0]]?.resets_at || ''}`;
       if (!shouldBlockStop(windowKey)) return '{}';
       const action = cfg.guardAction || m.stopAction(cfg.handoff);
       return JSON.stringify({
@@ -230,17 +234,22 @@ export async function runCli(mode, cwd, deps = {}) {
   return '{}';
 }
 
-// Parse a Claude Code stdin payload once, extracting both the working directory and the
-// native rate_limits block. Returns safe defaults on missing fields or malformed input.
-export function parseStdin(raw, fallback) {
+// Parse a Claude Code stdin payload once, extracting the project directory, the native
+// rate_limits block and the hook fields. The project root wins over the current directory
+// (Claude may have cd'd into a subdir, where .claude/limit-guard.json and the handoff are not):
+// status line workspace.project_dir, then the hook env CLAUDE_PROJECT_DIR (`env`, passed by the
+// entrypoint only), then workspace.current_dir / cwd. Safe defaults on missing/malformed input.
+export function parseStdin(raw, fallback, env = {}) {
   try {
     const j = JSON.parse(raw);
     return {
-      cwd: j?.workspace?.current_dir || j?.cwd || fallback,
+      cwd: j?.workspace?.project_dir || env.CLAUDE_PROJECT_DIR || j?.workspace?.current_dir || j?.cwd || fallback,
       rateLimits: j?.rate_limits,
+      sessionId: typeof j?.session_id === 'string' ? j.session_id : '',
+      stopHookActive: j?.stop_hook_active === true,
     };
   } catch {
-    return { cwd: fallback, rateLimits: undefined };
+    return { cwd: env.CLAUDE_PROJECT_DIR || fallback, rateLimits: undefined, sessionId: '', stopHookActive: false };
   }
 }
 
@@ -263,7 +272,7 @@ function readStdin() {
   if (process.stdin.isTTY) return { cwd: process.cwd(), rateLimits: undefined, payload: null };
   try {
     const raw = readFileSync(0, 'utf8'); // fd 0 = stdin
-    return { ...parseStdin(raw, process.cwd()), payload: parseFields(raw) };
+    return { ...parseStdin(raw, process.cwd(), process.env), payload: parseFields(raw) };
   } catch {
     return { cwd: process.cwd(), rateLimits: undefined, payload: null };
   }
@@ -271,9 +280,9 @@ function readStdin() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const mode = process.argv[2] || '--statusline';
-  const { cwd, rateLimits, payload } = readStdin();
+  const { cwd, rateLimits, payload, sessionId, stopHookActive } = readStdin();
   const stdinUsage = usageFromRateLimits(rateLimits);
-  runCli(mode, cwd, { stdinUsage, payload })
+  runCli(mode, cwd, { stdinUsage, payload, sessionId, stopHookActive })
     .then((out) => process.stdout.write(out))
     .catch(() => process.stdout.write(mode === '--statusline' ? 'limit ?' : '{}'));
 }

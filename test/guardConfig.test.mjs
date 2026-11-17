@@ -262,3 +262,36 @@ test('clearGlobalWarn: no file -> no throw', () => {
   const fs = fakeFs();
   assert.doesNotThrow(() => clearGlobalWarn({ ...fs, env: ENV }));
 });
+
+// --- global settings.json hardening: BOM tolerated, backup taken, atomic write (real fs, scratch dir) ---
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+test('setGlobalOption: BOM-prefixed settings.json is read, backed up, rewritten atomically', () => {
+  const d = mkdtempSync(join(tmpdir(), 'clg-gc-'));
+  try {
+    const path = join(d, 'settings.json');
+    const before = String.fromCharCode(0xFEFF) + JSON.stringify({ model: 'x' });
+    writeFileSync(path, before, 'utf8');
+    setGlobalOption('threshold', 90, { env: { CLAUDE_CONFIG_DIR: d } });
+    const after = JSON.parse(readFileSync(path, 'utf8'));
+    assert.equal(after.model, 'x'); // BOM did not make the file look invalid / wipe it
+    assert.equal(after.pluginConfigs[PLUGIN_KEY].options.threshold, 90);
+    assert.equal(readFileSync(path + '.bak-limitguard', 'utf8'), before); // previous bytes preserved
+    assert.deepEqual(readdirSync(d).filter((f) => f.endsWith('.tmp')), []); // temp file renamed away
+  } finally { rmSync(d, { recursive: true, force: true }); }
+});
+
+test('setGlobalOption: rename failure falls back to a direct write', () => {
+  const fs = fakeFs({ '/g/settings.json': '{}' });
+  fs.rename = () => { throw new Error('EPERM'); };
+  setGlobalOption('threshold', 80, { ...fs, env: { CLAUDE_CONFIG_DIR: '/g' } });
+  assert.equal(JSON.parse(fs.files.get(join('/g', 'settings.json'))).pluginConfigs[PLUGIN_KEY].options.threshold, 80);
+});
+
+test('setProjectOption: project file gets no backup file', () => {
+  const fs = fakeFs();
+  const path = setProjectOption('/proj', 'threshold', 80, fs);
+  assert.equal(fs.files.has(path + '.bak-limitguard'), false);
+});

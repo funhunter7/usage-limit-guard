@@ -36,6 +36,20 @@ async function fetchLatestTag(signal) {
   }
 }
 
+// True only when `latest` is a strictly higher x.y.z than `installed`. A local version that is
+// ahead of the latest GitHub release (unreleased tag) or any unparsable string is not a failure.
+export function isNewerVersion(latest, installed) {
+  const parse = (v) => {
+    const m = /^v?(\d+)\.(\d+)\.(\d+)/.exec(String(v ?? ''));
+    return m ? [m[1], m[2], m[3]].map(Number) : null;
+  };
+  const a = parse(latest);
+  const b = parse(installed);
+  if (!a || !b) return false;
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i];
+  return false;
+}
+
 function pluginVersion() {
   try {
     const here = dirname(fileURLToPath(import.meta.url));
@@ -68,8 +82,7 @@ async function main() {
   if (latest == null) {
     checks.push({ key: 'version', ok: true, note: `v${version ?? '?'} (${m.doctorVersionUnknown})` });
   } else {
-    const latestNorm = latest.replace(/^v/, '');
-    checks.push({ key: 'version', ok: latestNorm === version, note: `v${version ?? '?'} → ${latest}`, hint: m.doctorHint_version });
+    checks.push({ key: 'version', ok: !isNewerVersion(latest, version), note: `v${version ?? '?'} → ${latest}`, hint: m.doctorHint_version });
   }
 
   process.stdout.write(renderDoctor(checks, { locale: cfg.locale }) + '\n');

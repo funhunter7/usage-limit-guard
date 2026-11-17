@@ -3,8 +3,8 @@
 // backing up the previous file first. Idempotent: a no-op when already wired.
 // --force-hyperlink instead sets env.FORCE_HYPERLINK=1 (clickable links in Windows Terminal;
 // an explicit "0" is left alone). --check-hyperlink prints `ask` or `skip`: whether to offer it.
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, normalize } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { loadConfig } from '../lib/config.mjs';
 import { resolveLocale } from '../lib/format.mjs';
@@ -30,6 +30,19 @@ export function computeSettings(existing, command, refreshInterval = REFRESH_INT
   return { settings: { ...existing, statusLine: { type: 'command', command, refreshInterval } }, changed: true };
 }
 
+// CLAUDE_PLUGIN_ROOT is the versioned cache dir (plugins/cache/<marketplace>/<plugin>/<version>).
+// Claude Code deletes an old version dir 14 days after an update
+// (https://code.claude.com/docs/en/plugins/loading.md), which would silently drop the status line.
+// The marketplace clone (plugins/marketplaces/<marketplace>) survives updates, so wire that when it
+// holds this plugin; otherwise keep the given root. Trade-off: it tracks the auto-updated marketplace
+// HEAD, which can be ahead of the installed hook version.
+export function stablePluginRoot(pluginRoot, exists = existsSync) {
+  const m = /^(.*[\\/]plugins)[\\/]cache[\\/]([^\\/]+)[\\/][^\\/]+[\\/][^\\/]+[\\/]?$/.exec(pluginRoot);
+  if (!m) return pluginRoot;
+  const clone = normalize(`${m[1]}/marketplaces/${m[2]}`);
+  return exists(join(clone, 'bin', 'usage.mjs')) ? clone : pluginRoot;
+}
+
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
 // Pure: returns settings with env.FORCE_HYPERLINK="1" (other env keys preserved) plus a `changed` flag.
@@ -47,7 +60,7 @@ export function computeForceHyperlink(existing) {
 
 // Applies either the status line wiring or (forceHyperlink) the FORCE_HYPERLINK env to the
 // settings file, backing up the previous file first. Returns the messages to print.
-export function runSetup({ pluginRoot, settingsPath, forceHyperlink = false, m }) {
+export function runSetup({ pluginRoot, settingsPath, forceHyperlink = false, m, exists = existsSync }) {
   let raw = null;
   try { raw = readFileSync(settingsPath, 'utf8'); } catch { /* no global settings yet */ }
   // A settings.json we cannot parse must never be overwritten (it would lose the user's
@@ -58,7 +71,7 @@ export function runSetup({ pluginRoot, settingsPath, forceHyperlink = false, m }
     if (!isPlainObject(existing)) throw new Error(`${settingsPath} is not a JSON object; nothing was changed`);
   }
 
-  const command = `node "${join(pluginRoot, 'bin', 'usage.mjs')}" --statusline`;
+  const command = `node "${join(stablePluginRoot(pluginRoot, exists), 'bin', 'usage.mjs')}" --statusline`;
   const { settings, changed, optedOut } = forceHyperlink ? computeForceHyperlink(existing) : computeSettings(existing, command);
   if (optedOut) return [m.setupHyperlinkOptOut];
   const done = forceHyperlink ? m.setupHyperlinkSet : m.setupWired;

@@ -8,10 +8,12 @@ import {
   clearProjectWarn,
   setGlobalWarn,
   clearGlobalWarn,
+  readValueFromStdin,
 } from '../lib/guardConfig.mjs';
 
 // Usage:
 //   node bin/guard.mjs --scope project|global --action set --value "<text>"
+//   node bin/guard.mjs --scope project|global --action set --value-stdin <<'EOF' ... EOF   (free text, no shell quoting)
 //   node bin/guard.mjs --scope project|global --action clear
 //   node bin/guard.mjs --scope project|global --action set --value "<text>" --kind warn
 //   node bin/guard.mjs --scope project|global --action clear --kind warn
@@ -23,17 +25,20 @@ function parseArgs(argv) {
     if (a === '--scope') out.scope = argv[++i];
     else if (a === '--action') out.action = argv[++i];
     else if (a === '--value') out.value = argv[++i];
+    else if (a === '--value-stdin') out.valueStdin = true;
     else if (a === '--kind') out.kind = argv[++i];
   }
   return out;
 }
 
 function main() {
-  const { scope, action, value, kind = 'guard' } = parseArgs(process.argv.slice(2));
+  const args = parseArgs(process.argv.slice(2));
+  const { scope, action, kind = 'guard' } = args;
+  const value = args.valueStdin ? readValueFromStdin() : args.value;
   if (!['project', 'global'].includes(scope)) throw new Error('--scope must be project|global');
   if (!['set', 'clear'].includes(action)) throw new Error('--action must be set|clear');
   if (!['guard', 'warn'].includes(kind)) throw new Error('--kind must be guard|warn');
-  if (action === 'set' && (value == null || value === '')) throw new Error('--value required for set');
+  if (action === 'set' && (value == null || value === '')) throw new Error('--value or --value-stdin required for set');
 
   let path;
   if (kind === 'warn') {

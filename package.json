@@ -8,7 +8,8 @@
   "scripts": {
     "test": "node --test",
     "lint": "eslint .",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm test",
+    "test:mod": "claude plugin test ."
   },
   "engines": {
     "node": ">=18"

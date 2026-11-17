@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { computeForceHyperlink, computeSettings, runSetup } from '../bin/setup.mjs';
+import { join, normalize } from 'node:path';
+import { computeForceHyperlink, computeSettings, runSetup, stablePluginRoot } from '../bin/setup.mjs';
 import { getMessages } from '../lib/messages.mjs';
 
 const CMD = 'node "/root/bin/usage.mjs" --statusline';
@@ -141,4 +141,28 @@ test('runSetup: a leading BOM is tolerated; a non-object env aborts --force-hype
   } finally {
     rmSync(d, { recursive: true, force: true });
   }
+});
+
+// --- stable status-line location (versioned cache dir is deleted 14 days after an update) ---
+
+test('stablePluginRoot: versioned cache dir -> marketplace clone when it holds the plugin', () => {
+  const cache = '/h/.claude/plugins/cache/claude-limit-guard/claude-limit-guard/0.13.0';
+  const clone = normalize('/h/.claude/plugins/marketplaces/claude-limit-guard');
+  assert.equal(stablePluginRoot(cache, () => true), clone);
+  assert.equal(stablePluginRoot(cache + '/', () => true), clone);
+  assert.equal(stablePluginRoot(cache, () => false), cache); // no clone -> keep what we were given
+});
+
+test('stablePluginRoot: a root outside plugins/cache is left alone', () => {
+  assert.equal(stablePluginRoot('/dev/claude-limit-guard', () => true), '/dev/claude-limit-guard');
+});
+
+test('runSetup: wires the marketplace clone instead of the versioned cache dir', () => {
+  const d = dir();
+  try {
+    const settingsPath = join(d, 'settings.json');
+    runSetup({ pluginRoot: '/h/.claude/plugins/cache/mk/pl/0.13.0', settingsPath, m: en, exists: () => true });
+    const cmd = JSON.parse(readFileSync(settingsPath, 'utf8')).statusLine.command;
+    assert.equal(cmd, `node "${join(normalize('/h/.claude/plugins/marketplaces/mk'), 'bin', 'usage.mjs')}" --statusline`);
+  } finally { rmSync(d, { recursive: true, force: true }); }
 });

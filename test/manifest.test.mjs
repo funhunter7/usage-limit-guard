@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -58,53 +58,53 @@ test('plugin.json: userConfig omits the OS/terminal-driven options (locale, time
   }
 });
 
-test('commands/limit-guard-config.md: drives bin/config.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-config.md: drives bin/config.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-config.md'), 'utf8');
   assert.match(md, /allowed-tools:.*AskUserQuestion/, 'must allow AskUserQuestion');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/config\.mjs/, 'must invoke bin/config.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-status.md: drives bin/status.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-status.md: drives bin/status.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-status.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/status\.mjs/, 'must invoke bin/status.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-stats.md: drives bin/stats.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-stats.md: drives bin/stats.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-stats.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/stats\.mjs/, 'must invoke bin/stats.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-snooze.md: drives bin/snooze.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-snooze.md: drives bin/snooze.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-snooze.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/snooze\.mjs/, 'must invoke bin/snooze.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-doctor.md: drives bin/doctor.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-doctor.md: drives bin/doctor.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-doctor.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/doctor\.mjs/, 'must invoke bin/doctor.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-setup.md: drives bin/setup.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-setup.md: drives bin/setup.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-setup.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/setup\.mjs/, 'must invoke bin/setup.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
-test('commands/limit-guard-legend.md: drives bin/legend.mjs via CLAUDE_PLUGIN_ROOT, Czech', () => {
+test('commands/limit-guard-legend.md: drives bin/legend.mjs via CLAUDE_PLUGIN_ROOT, user language', () => {
   const md = readFileSync(join(root, 'commands/limit-guard-legend.md'), 'utf8');
   assert.match(md, /allowed-tools:.*Bash/, 'must allow Bash');
   assert.match(md, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/legend\.mjs/, 'must invoke bin/legend.mjs');
-  assert.match(md, /Communicate with the user exclusively in Czech/, 'must instruct Czech');
+  assert.match(md, /Reply in the user's language/, "must reply in the user's language");
 });
 
 test('commands/limit-guard-setup.md: offers FORCE_HYPERLINK via AskUserQuestion and --force-hyperlink', () => {
@@ -120,4 +120,19 @@ test('hooks/hooks.json: keeps the command hooks and names the band mod; plugin.j
   assert.ok(hooks.hooks.UserPromptSubmit && hooks.hooks.Stop && hooks.hooks.SessionStart);
   assert.ok(readFileSync(join(root, 'hooks/band.tsx'), 'utf8').includes('export const register'));
   assert.equal(JSON.parse(readFileSync(join(root, '.claude-plugin/plugin.json'), 'utf8')).engines, undefined);
+});
+
+test('commands: none forces a language on the user (public plugin)', () => {
+  for (const f of readdirSync(join(root, 'commands')).filter((n) => n.endsWith('.md'))) {
+    const md = readFileSync(join(root, 'commands', f), 'utf8');
+    assert.doesNotMatch(md, /exclusively in Czech|in plain Czech/, `${f} must not force Czech`);
+  }
+});
+
+test('commands: free text goes through stdin, never onto the shell command line', () => {
+  for (const f of ['limit-guard-action.md', 'limit-guard-config.md']) {
+    const md = readFileSync(join(root, 'commands', f), 'utf8');
+    assert.match(md, /--value-stdin/, `${f} must use --value-stdin`);
+    assert.doesNotMatch(md, /--value "</, `${f} must not put free text in --value "..."`);
+  }
 });
