@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.14.0 — 2026-11-17
+
+- **Changed: renamed to usage-limit-guard** (`claude-` names are reserved for Anthropic, so
+  `claude plugin validate` rejected the old name). The plugin id is now `usage-limit-guard@usage-limit-guard`,
+  commands are `/usage-limit-guard:<command>`, and the repo is `funhunter7/usage-limit-guard`.
+  Existing options are still read from the old `claude-limit-guard@*` settings key when no
+  `usage-limit-guard@*` key exists; writes go to the new key. Runtime file names
+  (`claude-limit-guard-*.json`, `claude-limit-guard-usage.jsonl`) are unchanged.
+- **Migration:**
+
+  ```
+  claude plugin uninstall claude-limit-guard@claude-limit-guard
+  claude plugin marketplace remove claude-limit-guard
+  claude plugin marketplace add funhunter7/usage-limit-guard
+  claude plugin install usage-limit-guard@usage-limit-guard
+  ```
+
+  Then run `/limit-guard-setup` again: the status line is still wired to the old marketplace folder.
+
 ## 0.13.1 — 2026-11-17
 
 - **Fixed: Windows toasts never appeared.** `notifications: on` called `CreateToastNotifier` with an

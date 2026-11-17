@@ -1,5 +1,5 @@
 ---
-description: Explain every item of the claude-limit-guard status line, or switch legend mode (the explanation block in the band above the prompt) on or off
+description: Explain every item of the usage-limit-guard status line, or switch legend mode (the explanation block in the band above the prompt) on or off
 allowed-tools: Bash
 argument-hint: "[on|off]"
 ---

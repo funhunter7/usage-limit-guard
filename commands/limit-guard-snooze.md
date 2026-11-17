@@ -1,5 +1,5 @@
 ---
-description: Temporarily snooze the claude-limit-guard guard until the next reset (or clear the snooze)
+description: Temporarily snooze the usage-limit-guard guard until the next reset (or clear the snooze)
 allowed-tools: Bash
 argument-hint: "[clear]"
 ---

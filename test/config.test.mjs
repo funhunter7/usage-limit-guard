@@ -186,7 +186,7 @@ function fakeRead(map) {
 
 test('loadConfig: applies global pluginConfigs .options when env absent', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: 90, locale: 'cs-CZ', time_format: '24' } } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold: 90, locale: 'cs-CZ', time_format: '24' } } },
   }) });
   const cfg = loadConfig('/proj', read, GENV);
   assert.equal(cfg.threshold, 90);
@@ -196,7 +196,7 @@ test('loadConfig: applies global pluginConfigs .options when env absent', () => 
 
 test('loadConfig: env option beats global settings', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: 90 } } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold: 90 } } },
   }) });
   const cfg = loadConfig('/proj', read, { ...GENV, CLAUDE_PLUGIN_OPTION_THRESHOLD: '70' });
   assert.equal(cfg.threshold, 70);
@@ -204,7 +204,7 @@ test('loadConfig: env option beats global settings', () => {
 
 test('loadConfig: project file beats global and env', () => {
   const read = fakeRead({
-    settings: JSON.stringify({ pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: 90 } } } }),
+    settings: JSON.stringify({ pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold: 90 } } } }),
     project: JSON.stringify({ threshold: 50 }),
   });
   const cfg = loadConfig('/proj', read, { ...GENV, CLAUDE_PLUGIN_OPTION_THRESHOLD: '70' });
@@ -220,14 +220,14 @@ test('loadConfig: malformed global settings -> defaults, no throw', () => {
 
 test('loadConfig: legacy flat global option (no .options) is honored', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { locale: 'cs-CZ' } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { locale: 'cs-CZ' } },
   }) });
   assert.equal(loadConfig('/proj', read, GENV).locale, 'cs-CZ');
 });
 
 test('loadConfig: global watch (csv string) and threshold (string) both coerce', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { watch: 'five_hour', threshold: '88' } } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { watch: 'five_hour', threshold: '88' } } },
   }) });
   const cfg = loadConfig('/proj', read, GENV);
   assert.deepEqual(cfg.watch, ['five_hour']);
@@ -237,7 +237,7 @@ test('loadConfig: global watch (csv string) and threshold (string) both coerce',
 test('loadConfig: blank/array numeric values in global options are treated as unset', () => {
   for (const bad of ['', '   ', []]) {
     const read = fakeRead({ settings: JSON.stringify({
-      pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: bad, warn_band: bad } } },
+      pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold: bad, warn_band: bad } } },
     }) });
     const cfg = loadConfig('/proj', read, GENV);
     assert.equal(cfg.threshold, DEFAULT_CONFIG.threshold, `threshold for ${JSON.stringify(bad)}`);
@@ -247,7 +247,7 @@ test('loadConfig: blank/array numeric values in global options are treated as un
 
 test('loadConfig: null values in global options are treated as unset', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: null, warn_band: null, watch: null, locale: null, style: null } } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold: null, warn_band: null, watch: null, locale: null, style: null } } },
   }) });
   const cfg = loadConfig('/proj', read, GENV);
   assert.equal(cfg.threshold, DEFAULT_CONFIG.threshold);
@@ -379,7 +379,7 @@ test('loadConfig: out-of-range thresholdFiveHour in project file falls back to n
 
 test('loadConfig: global pluginConfigs threshold_five_hour is parsed', () => {
   const read = fakeRead({ settings: JSON.stringify({
-    pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold_five_hour: 85, threshold_seven_day: 70 } } },
+    pluginConfigs: { 'usage-limit-guard@usage-limit-guard': { options: { threshold_five_hour: 85, threshold_seven_day: 70 } } },
   }) });
   const cfg = loadConfig('/proj', read, GENV);
   assert.equal(cfg.thresholdFiveHour, 85);

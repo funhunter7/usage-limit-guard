@@ -2,9 +2,9 @@ import { expect, test } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
 const BAND = (props = {}) => ({
-  plugin: 'claude-limit-guard',
+  plugin: 'usage-limit-guard',
   component: 'AbovePrompt',
-  requestId: 'claude-limit-guard',
+  requestId: 'usage-limit-guard',
   surface: 'terminal',
   props: { hasSurvey: false, isCollapsed: false, isWorking: false, maxRows: 3, bodyColumns: 80, scroll: { offset: 0, bodyRows: 3 }, view: {}, ...props },
 }) as const

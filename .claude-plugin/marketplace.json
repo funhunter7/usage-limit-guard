@@ -1,12 +1,12 @@
 {
-  "name": "claude-limit-guard",
-  "description": "Claude Code plugin marketplace for claude-limit-guard: usage-limit status line, guard and handoff.",
+  "name": "usage-limit-guard",
+  "description": "Claude Code plugin marketplace for usage-limit-guard: usage-limit status line, guard and handoff.",
   "owner": {
     "name": "funhunter7"
   },
   "plugins": [
     {
-      "name": "claude-limit-guard",
+      "name": "usage-limit-guard",
       "source": "./",
       "description": "Watches Claude subscription usage limits; status line, context injection, and graceful save/resume at a configurable threshold."
     }

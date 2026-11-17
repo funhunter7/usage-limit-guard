@@ -1,5 +1,5 @@
 ---
-description: Auto-wire the claude-limit-guard status line into ~/.claude/settings.json (with a backup)
+description: Auto-wire the usage-limit-guard status line into ~/.claude/settings.json (with a backup)
 allowed-tools: Bash, AskUserQuestion
 ---
 

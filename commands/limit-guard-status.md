@@ -1,5 +1,5 @@
 ---
-description: Show the resolved claude-limit-guard config and a health snapshot (token, cache, status-line)
+description: Show the resolved usage-limit-guard config and a health snapshot (token, cache, status-line)
 allowed-tools: Bash
 ---
 

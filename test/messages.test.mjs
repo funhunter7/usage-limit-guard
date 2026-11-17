@@ -73,7 +73,7 @@ test('getMessages: builders interpolate handoff path', () => {
 
 test('getMessages: notification strings name the window and band, both locales', () => {
   const en = getMessages('en-US');
-  assert.match(en.notifyTitle, /claude-limit-guard/);
+  assert.match(en.notifyTitle, /usage-limit-guard/);
   assert.match(en.notifyWarn('five_hour'), /five_hour/);
   assert.match(en.notifyBreach('seven_day'), /seven_day/);
   const cs = getMessages('cs-CZ');

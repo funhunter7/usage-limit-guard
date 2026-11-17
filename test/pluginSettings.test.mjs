@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PLUGIN_KEY, globalSettingsPath, resolveGlobalKey, readGlobalOptions } from '../lib/pluginSettings.mjs';
+import { PLUGIN_KEY, resolveReadKey, globalSettingsPath, resolveGlobalKey, readGlobalOptions } from '../lib/pluginSettings.mjs';
 
 const ENV = { CLAUDE_CONFIG_DIR: '/home/u/.claude' };
 const readFrom = (raw) => (_path, _enc) => {
@@ -20,17 +20,22 @@ test('resolveGlobalKey: env override wins', () => {
   assert.equal(resolveGlobalKey({}, { CLAUDE_LIMIT_GUARD_PLUGIN_KEY: 'foo@bar' }), 'foo@bar');
 });
 
-test('resolveGlobalKey: existing claude-limit-guard@* key', () => {
-  const settings = { pluginConfigs: { 'claude-limit-guard@mk': {} } };
-  assert.equal(resolveGlobalKey(settings, {}), 'claude-limit-guard@mk');
+test('resolveGlobalKey: existing usage-limit-guard@* key', () => {
+  const settings = { pluginConfigs: { 'usage-limit-guard@mk': {} } };
+  assert.equal(resolveGlobalKey(settings, {}), 'usage-limit-guard@mk');
 });
 
 test('resolveGlobalKey: default when nothing matches', () => {
   assert.equal(resolveGlobalKey({}, {}), PLUGIN_KEY);
 });
 
-test('resolveGlobalKey: env override wins over an existing matching key', () => {
+test('resolveGlobalKey: never writes to a legacy claude-limit-guard@* key', () => {
   const settings = { pluginConfigs: { 'claude-limit-guard@mk': {} } };
+  assert.equal(resolveGlobalKey(settings, {}), PLUGIN_KEY);
+});
+
+test('resolveGlobalKey: env override wins over an existing matching key', () => {
+  const settings = { pluginConfigs: { 'usage-limit-guard@mk': {} } };
   assert.equal(resolveGlobalKey(settings, { CLAUDE_LIMIT_GUARD_PLUGIN_KEY: 'foo@bar' }), 'foo@bar');
 });
 
@@ -58,6 +63,29 @@ test('readGlobalOptions: .options wins over legacy flat keys', () => {
 test('readGlobalOptions: legacy flat option (no .options) is returned', () => {
   const raw = JSON.stringify({ pluginConfigs: { [PLUGIN_KEY]: { locale: 'cs-CZ' } } });
   assert.deepEqual(readGlobalOptions(ENV, readFrom(raw)), { locale: 'cs-CZ' });
+});
+
+test('resolveReadKey: falls back to a legacy claude-limit-guard@* key when no new key exists', () => {
+  const settings = { pluginConfigs: { 'claude-limit-guard@mk': {} } };
+  assert.equal(resolveReadKey(settings, {}), 'claude-limit-guard@mk');
+});
+
+test('resolveReadKey: new key wins over a legacy key', () => {
+  const settings = { pluginConfigs: { 'claude-limit-guard@mk': {}, [PLUGIN_KEY]: {} } };
+  assert.equal(resolveReadKey(settings, {}), PLUGIN_KEY);
+});
+
+test('readGlobalOptions: legacy claude-limit-guard@* options are read when no new key exists', () => {
+  const raw = JSON.stringify({ pluginConfigs: { 'claude-limit-guard@claude-limit-guard': { options: { threshold: 85 } } } });
+  assert.deepEqual(readGlobalOptions(ENV, readFrom(raw)), { threshold: 85 });
+});
+
+test('readGlobalOptions: new key wins over legacy key', () => {
+  const raw = JSON.stringify({ pluginConfigs: {
+    'claude-limit-guard@claude-limit-guard': { options: { threshold: 85 } },
+    [PLUGIN_KEY]: { options: { threshold: 95 } },
+  } });
+  assert.deepEqual(readGlobalOptions(ENV, readFrom(raw)), { threshold: 95 });
 });
 
 test('readGlobalOptions: no pluginConfigs -> {}', () => {

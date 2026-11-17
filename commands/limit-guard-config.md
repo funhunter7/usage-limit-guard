@@ -1,9 +1,9 @@
 ---
-description: Pick claude-limit-guard settings from a list instead of typing them (global or per-project)
+description: Pick usage-limit-guard settings from a list instead of typing them (global or per-project)
 allowed-tools: AskUserQuestion, Bash
 ---
 
-You are configuring the `claude-limit-guard` plugin. Claude Code's `/config` dialog has no
+You are configuring the `usage-limit-guard` plugin. Claude Code's `/config` dialog has no
 pick-from-list (enum) inputs, so this command lets the user **choose** values from menus
 and writes them through the validated helper — never hand-edit JSON.
 

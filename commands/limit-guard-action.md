@@ -1,9 +1,9 @@
 ---
-description: Set or clear the claude-limit-guard guard action or warn action (globally or for this project)
+description: Set or clear the usage-limit-guard guard action or warn action (globally or for this project)
 allowed-tools: AskUserQuestion, Bash
 ---
 
-You are configuring **guard actions** for the `claude-limit-guard` plugin.
+You are configuring **guard actions** for the `usage-limit-guard` plugin.
 
 Reply in the user's language (the language they write in); translate any option labels and explanations below into it.
 

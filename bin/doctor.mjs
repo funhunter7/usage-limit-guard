@@ -27,7 +27,7 @@ export function renderDoctor(checks, opts = {}) {
 // Best-effort latest-release lookup. Returns the tag_name or null on any error/timeout.
 async function fetchLatestTag(signal) {
   try {
-    const res = await fetch('https://api.github.com/repos/funhunter7/claude-limit-guard/releases/latest', { signal });
+    const res = await fetch('https://api.github.com/repos/funhunter7/usage-limit-guard/releases/latest', { signal });
     if (!res.ok) return null;
     const j = await res.json();
     return typeof j.tag_name === 'string' ? j.tag_name : null;

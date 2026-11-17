@@ -1,5 +1,5 @@
 ---
-description: Show a summary of recent claude-limit-guard usage (peaks, resets) from the rolling 7-day log
+description: Show a summary of recent usage-limit-guard usage (peaks, resets) from the rolling 7-day log
 allowed-tools: Bash
 ---
 

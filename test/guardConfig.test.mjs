@@ -164,14 +164,14 @@ test('clearGlobalGuard: no file -> no throw', () => {
   assert.doesNotThrow(() => clearGlobalGuard({ ...fs, env: ENV }));
 });
 
-test('setGlobalGuard: writes under an existing claude-limit-guard@* key', () => {
+test('setGlobalGuard: writes under an existing usage-limit-guard@* key', () => {
   const fs = fakeFs();
   const path = setGlobalGuard('x', { ...fs, env: ENV });
-  fs.files.set(path, JSON.stringify({ pluginConfigs: { 'claude-limit-guard@my-market': { foo: 1 } } }));
+  fs.files.set(path, JSON.stringify({ pluginConfigs: { 'usage-limit-guard@my-market': { foo: 1 } } }));
   setGlobalGuard('new', { ...fs, env: ENV });
   const obj = JSON.parse(fs.files.get(path));
-  assert.equal(obj.pluginConfigs['claude-limit-guard@my-market'].options.guard_action, 'new');
-  assert.equal(obj.pluginConfigs['claude-limit-guard@my-market'].foo, 1);
+  assert.equal(obj.pluginConfigs['usage-limit-guard@my-market'].options.guard_action, 'new');
+  assert.equal(obj.pluginConfigs['usage-limit-guard@my-market'].foo, 1);
   assert.equal(obj.pluginConfigs[PLUGIN_KEY], undefined); // did not create the default key
 });
 
@@ -182,14 +182,14 @@ test('setGlobalGuard: CLAUDE_LIMIT_GUARD_PLUGIN_KEY override picks the key', () 
   assert.equal(obj.pluginConfigs['foo@bar'].options.guard_action, 'x');
 });
 
-test('clearGlobalGuard: clears under an existing claude-limit-guard@* key', () => {
+test('clearGlobalGuard: clears under an existing usage-limit-guard@* key', () => {
   const fs = fakeFs();
   const path = setGlobalGuard('x', { ...fs, env: ENV });
-  fs.files.set(path, JSON.stringify({ pluginConfigs: { 'claude-limit-guard@mk': { options: { guard_action: 'x', threshold: 90 } } } }));
+  fs.files.set(path, JSON.stringify({ pluginConfigs: { 'usage-limit-guard@mk': { options: { guard_action: 'x', threshold: 90 } } } }));
   clearGlobalGuard({ ...fs, env: ENV });
   const obj = JSON.parse(fs.files.get(path));
-  assert.equal(obj.pluginConfigs['claude-limit-guard@mk'].options.guard_action, undefined);
-  assert.equal(obj.pluginConfigs['claude-limit-guard@mk'].options.threshold, 90);
+  assert.equal(obj.pluginConfigs['usage-limit-guard@mk'].options.guard_action, undefined);
+  assert.equal(obj.pluginConfigs['usage-limit-guard@mk'].options.threshold, 90);
 });
 
 // --- warn_action setters ---

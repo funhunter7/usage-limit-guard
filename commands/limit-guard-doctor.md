@@ -1,5 +1,5 @@
 ---
-description: Run a claude-limit-guard self-check (Node version, token, status-line, cache, plugin version)
+description: Run a usage-limit-guard self-check (Node version, token, status-line, cache, plugin version)
 allowed-tools: Bash
 ---
 

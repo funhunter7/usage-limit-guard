@@ -1,6 +1,6 @@
 # Limit-guard instructions for this project
 
-When claude-limit-guard reports the threshold was crossed, do this in order:
+When usage-limit-guard reports the threshold was crossed, do this in order:
 
 1. Finish the atomic step in progress — leave no half-done edit.
 2. Write/update the handoff (`.claude/RESUME.md`): what is done, what remains,

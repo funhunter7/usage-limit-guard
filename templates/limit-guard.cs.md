@@ -1,6 +1,6 @@
 # Limit-guard instrukce pro tento projekt
 
-Když claude-limit-guard ohlásí překročení prahu, proveď v tomto pořadí:
+Když usage-limit-guard ohlásí překročení prahu, proveď v tomto pořadí:
 
 1. Dokonči rozdělaný atomický krok — nenech žádnou poloviční editaci.
 2. Zapiš/aktualizuj handoff (`.claude/RESUME.md`): co je hotové, co zbývá,

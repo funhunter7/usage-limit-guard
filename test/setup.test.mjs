@@ -146,15 +146,15 @@ test('runSetup: a leading BOM is tolerated; a non-object env aborts --force-hype
 // --- stable status-line location (versioned cache dir is deleted 14 days after an update) ---
 
 test('stablePluginRoot: versioned cache dir -> marketplace clone when it holds the plugin', () => {
-  const cache = '/h/.claude/plugins/cache/claude-limit-guard/claude-limit-guard/0.13.0';
-  const clone = normalize('/h/.claude/plugins/marketplaces/claude-limit-guard');
+  const cache = '/h/.claude/plugins/cache/usage-limit-guard/usage-limit-guard/0.13.0';
+  const clone = normalize('/h/.claude/plugins/marketplaces/usage-limit-guard');
   assert.equal(stablePluginRoot(cache, () => true), clone);
   assert.equal(stablePluginRoot(cache + '/', () => true), clone);
   assert.equal(stablePluginRoot(cache, () => false), cache); // no clone -> keep what we were given
 });
 
 test('stablePluginRoot: a root outside plugins/cache is left alone', () => {
-  assert.equal(stablePluginRoot('/dev/claude-limit-guard', () => true), '/dev/claude-limit-guard');
+  assert.equal(stablePluginRoot('/dev/usage-limit-guard', () => true), '/dev/usage-limit-guard');
 });
 
 test('runSetup: wires the marketplace clone instead of the versioned cache dir', () => {

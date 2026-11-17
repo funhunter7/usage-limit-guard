@@ -1,12 +1,12 @@
-# claude-limit-guard
+# usage-limit-guard
 
-> Never get cut off mid-task again. **claude-limit-guard** watches your Claude subscription
+> Never get cut off mid-task again. **usage-limit-guard** watches your Claude subscription
 > usage, shows it in the status line, injects it into context, and — at a threshold you
 > choose — gracefully saves a handoff so work resumes cleanly after the limit resets.
 
-[![CI](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml)
+[![CI](https://github.com/funhunter7/usage-limit-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/funhunter7/usage-limit-guard/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.13.1-brightgreen)
+![Version](https://img.shields.io/badge/version-0.14.0-brightgreen)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Windows%20·%20macOS%20·%20Linux-lightgrey)
 
@@ -14,7 +14,7 @@
   <img src="assets/demo.svg" alt="Animated demo: the session usage climbs from green to amber to red, then the guard saves a handoff to RESUME.md" width="100%">
 </p>
 <p align="center">
-  <img src="assets/status-line.svg" alt="claude-limit-guard status line: per-window usage %, color band, and reset time — localized to the OS" width="100%">
+  <img src="assets/status-line.svg" alt="usage-limit-guard status line: per-window usage %, color band, and reset time — localized to the OS" width="100%">
 </p>
 
 ```text
@@ -62,23 +62,23 @@ when it resets — a same-day reset shows just the time, a later one adds the we
 In Claude Code, add this repository as a marketplace and install the plugin:
 
 ```text
-/plugin marketplace add funhunter7/claude-limit-guard
-/plugin install claude-limit-guard@claude-limit-guard
+/plugin marketplace add funhunter7/usage-limit-guard
+/plugin install usage-limit-guard@usage-limit-guard
 ```
 
-(`funhunter7/claude-limit-guard` is the GitHub `owner/repo`; `claude-limit-guard@claude-limit-guard`
+(`funhunter7/usage-limit-guard` is the GitHub `owner/repo`; `usage-limit-guard@usage-limit-guard`
 is `plugin@marketplace`.) This auto-registers the hooks, the `/limit-guard-config` and
 `/limit-guard-action` commands, and the `/config` options. Pull updates later with:
 
 ```text
-/plugin marketplace update claude-limit-guard
-/plugin update claude-limit-guard
+/plugin marketplace update usage-limit-guard
+/plugin update usage-limit-guard
 ```
 
 ### Local development
 
 ```bash
-claude --plugin-dir /path/to/claude-limit-guard
+claude --plugin-dir /path/to/usage-limit-guard
 ```
 
 ### Status line (manual)
@@ -89,7 +89,7 @@ The status line is a user setting, so add it to `~/.claude/settings.json` yourse
 {
   "statusLine": {
     "type": "command",
-    "command": "node \"%LOCALAPPDATA%\\path\\to\\claude-limit-guard\\bin\\usage.mjs\" --statusline",
+    "command": "node \"%LOCALAPPDATA%\\path\\to\\usage-limit-guard\\bin\\usage.mjs\" --statusline",
     "refreshInterval": 60
   }
 }
@@ -179,7 +179,7 @@ These follow your environment, so `/config` doesn't prompt for them. Override on
   ```json
   {
     "pluginConfigs": {
-      "claude-limit-guard@claude-limit-guard": {
+      "usage-limit-guard@usage-limit-guard": {
         "options": {
           "threshold": 90,
           "guard_action": "Save a handoff to RESUME.md and stop."

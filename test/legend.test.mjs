@@ -22,7 +22,7 @@ test('renderLegend: cs on Windows Terminal uses full-tier glyphs, one "sample �
   assert.match(lines[7], /^🏠 my-project — /);
   assert.match(lines[8], /^🔀 my-branch — /);
   assert.match(lines[9], /^📁 scratchpad — odkládací složka/);
-  assert.equal(lines[10], 'Podrobnosti: https://github.com/funhunter7/claude-limit-guard/blob/main/docs/legend.cs.md');
+  assert.equal(lines[10], 'Podrobnosti: https://github.com/funhunter7/usage-limit-guard/blob/main/docs/legend.cs.md');
 });
 
 test('renderLegend: ascii tier uses [#] bar, ^ arrow and no emoji; never emits SGR escapes', () => {
