@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/funhunter7/claude-limit-guard/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.13.0-brightgreen)
+![Version](https://img.shields.io/badge/version-0.13.1-brightgreen)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Windows%20·%20macOS%20·%20Linux-lightgrey)
 

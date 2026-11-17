@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.1 — 2026-11-17
 
 - **Fixed: Windows toasts never appeared.** `notifications: on` called `CreateToastNotifier` with an
   unregistered AppUserModelID (`claude-limit-guard`), which Windows silently ignores
