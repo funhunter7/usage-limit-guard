@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { soonestReset } from '../bin/snooze.mjs';
+import { soonestReset } from '../scripts/snooze.mjs';
 
 const NOW = Date.parse('2026-05-31T00:00:00Z');
 

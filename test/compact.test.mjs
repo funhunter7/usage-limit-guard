@@ -238,12 +238,12 @@ test('resolveScratchDir: built-in <tmp>/claude/*/<session>/scratchpad via inject
     const sp = join(root, 'claude', 'slug-a', 'sess1', 'scratchpad');
     mkdirSync(sp, { recursive: true });
     mkdirSync(join(root, 'claude', 'slug-b'), { recursive: true });
-    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: root }), null); // empty
+    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: root, cachePath: join(root, 's.json') }), null); // empty
     writeFileSync(join(sp, 'f'), 'x');
-    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: root }), sp);
-    assert.equal(resolveScratchDir({ sessionId: 'other', tmp: root }), null);
-    assert.equal(resolveScratchDir({ sessionId: '../x', tmp: root }), null); // no traversal
-    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: join(root, 'missing') }), null); // fs error -> silent
+    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: root, cachePath: join(root, 's.json') }), sp);
+    assert.equal(resolveScratchDir({ sessionId: 'other', tmp: root, cachePath: join(root, 's.json') }), null);
+    assert.equal(resolveScratchDir({ sessionId: '../x', tmp: root, cachePath: join(root, 's.json') }), null); // no traversal
+    assert.equal(resolveScratchDir({ sessionId: 'sess1', tmp: join(root, 'missing'), cachePath: join(root, 'other.json') }), null); // fs error -> silent
   } finally { done(); }
 });
 
@@ -251,15 +251,15 @@ test('buildPaths: project, worktree only when present, scratch only when usable'
   const { root, done } = sandbox();
   try {
     const fields = { ...fieldsFromPayload({ workspace: { project_dir: '/a/proj', current_dir: '/a/proj/sub' }, session_id: 's' }) };
-    assert.deepEqual(buildPaths(fields, { tmp: root }), [{ kind: 'project', name: 'proj', dir: '/a/proj' }]);
+    assert.deepEqual(buildPaths(fields, { tmp: root, cachePath: join(root, 's.json') }), [{ kind: 'project', name: 'proj', dir: '/a/proj' }]);
     const wt = { ...fields, worktreeName: 'rf', worktreePath: null };
-    assert.deepEqual(buildPaths(wt, { tmp: root }).map((p) => [p.kind, p.name, p.dir]),
+    assert.deepEqual(buildPaths(wt, { tmp: root, cachePath: join(root, 's.json') }).map((p) => [p.kind, p.name, p.dir]),
       [['project', 'proj', '/a/proj'], ['worktree', 'rf', '/a/proj/sub']]);
     const sp = join(root, 'claude', 'x', 's', 'scratchpad');
     mkdirSync(sp, { recursive: true });
     writeFileSync(join(sp, 'f'), '1');
-    assert.deepEqual(buildPaths(fields, { tmp: root }).at(-1), { kind: 'scratch', name: 'scratchpad', dir: sp });
-    assert.deepEqual(buildPaths(fieldsFromPayload(null), { tmp: root }), []);
+    assert.deepEqual(buildPaths(fields, { tmp: root, cachePath: join(root, 's.json') }).at(-1), { kind: 'scratch', name: 'scratchpad', dir: sp });
+    assert.deepEqual(buildPaths(fieldsFromPayload(null), { tmp: root, cachePath: join(root, 's.json') }), []);
   } finally { done(); }
 });
 

@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.15.0 — 2026-11-17
+
+- **After updating, run `/limit-guard-setup` once.** The scripts moved from `bin/` to `scripts/`, so a status line wired
+  to the old path stops working. The next SessionStart also re-points a stale or legacy `bin/` wiring automatically when
+  it clearly belongs to this plugin; any other status line is never touched.
+- **Security: project-file actions are opt-in.** `guardAction`, `warnAction` and `handoff` from `.claude/limit-guard.json`
+  (and the built-in pointer to `.claude/limit-guard.md`) are ignored unless the new user-level option
+  `allow_project_actions` is on; when allowed, the text is prefixed `(from project file …)`. Action text from any source
+  is capped at 500 characters. `/limit-guard-status` lists ignored keys, and `/limit-guard-action` / `/limit-guard-config`
+  warn when a project value will be ignored.
+- **Changed: state moved out of the shared temp dir** into the plugin data folder
+  (`~/.claude/plugins/data/usage-limit-guard-usage-limit-guard/`, or `CLAUDE_PLUGIN_DATA` in hooks): `cache.json`,
+  `history.json`, `notify.json`, `stop.json`, `snooze.json`, `scratch.json`. One resolver (`lib/stateDir.mjs`) serves
+  hooks, status line and scripts. The old `claude-limit-guard-*.json` files in the temp dir are not migrated (they are
+  short-lived); a snooze set before the update is lost. The usage log keeps its place. External scripts that read the old
+  temp files must be pointed at the new folder and file names.
+- **Changed: `bin/` renamed to `scripts/`** (a top-level `bin/` lands on the Bash tool PATH and keeps the plugin off
+  claude.ai/Cowork). Hooks, skills, setup, doctor (a legacy `bin/` wiring now reports as not wired) and tests follow.
+- **Changed: `commands/` converted to `skills/`** (user-invocable, same names, e.g. `/limit-guard-status`).
+- **Changed: `/config` pickers and bounds.** Enum options (`layout`, `background`, `bar_style`, `label_style`,
+  `reset_display`, `projection_display`, `window_display`, `notifications`) are pickers and the four thresholds accept
+  1–100. **Requires Claude Code 2.1.271 or later** (older versions cannot load a plugin that declares `options`).
+- Added a plugin icon (`assets/icon.png`). The README documents the risk of the undocumented `api/oauth/usage` fallback.
+
 ## 0.14.0 — 2026-11-17
 
 - **Changed: renamed to usage-limit-guard** (`claude-` names are reserved for Anthropic, so

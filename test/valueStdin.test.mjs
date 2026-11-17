@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const BIN = (name) => fileURLToPath(new URL(`../bin/${name}`, import.meta.url));
+const BIN = (name) => fileURLToPath(new URL(`../scripts/${name}`, import.meta.url));
 const NASTY = 'say "hi" `whoami` $(id) \'q\' $HOME';
 
 // Runs a bin in a scratch project dir with a scratch config dir (never the real ~/.claude).

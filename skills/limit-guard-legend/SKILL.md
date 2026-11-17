@@ -9,7 +9,7 @@ Reply in the user's language (the language they write in); translate any option 
 - If `$ARGUMENTS` is empty, run the legend command and show its output to the user:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/legend.mjs"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/legend.mjs"
 ```
 
 The command prints one line per status line item: a sample as it looks in the user's terminal, then
@@ -24,7 +24,7 @@ shows the same explanation as a block in the band above the prompt (and `off` hi
   the raw `$ARGUMENTS` text:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/legend.mjs" on
+node "${CLAUDE_PLUGIN_ROOT}/scripts/legend.mjs" on
 ```
 
 (or `... off`). Any other non-empty `$ARGUMENTS`: do not run anything; tell the user the only

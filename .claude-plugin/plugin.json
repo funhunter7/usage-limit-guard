@@ -1,30 +1,41 @@
 {
   "name": "usage-limit-guard",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "Watches Claude subscription usage limits; shows them in the status line, injects them into context, and gracefully saves/resumes work at a configurable threshold.",
-  "author": { "name": "funhunter7" },
+  "author": {
+    "name": "funhunter7"
+  },
+  "icon": "./assets/icon.png",
   "userConfig": {
     "threshold": {
       "type": "number",
       "title": "Usage threshold (%)",
       "description": "At or above this percentage the guard routine triggers (default 95).",
-      "default": 95
+      "default": 95,
+      "min": 1,
+      "max": 100
     },
     "warn_band": {
       "type": "number",
       "title": "Warning band (%)",
       "description": "At or above this percentage (but below the threshold) the status line turns amber (default 80).",
-      "default": 80
+      "default": 80,
+      "min": 1,
+      "max": 100
     },
     "threshold_five_hour": {
       "type": "number",
       "title": "5-hour window threshold (%)",
-      "description": "Override the guard threshold for the five_hour window only. Leave blank to use the global threshold."
+      "description": "Override the guard threshold for the five_hour window only. Leave blank to use the global threshold.",
+      "min": 1,
+      "max": 100
     },
     "threshold_seven_day": {
       "type": "number",
       "title": "7-day window threshold (%)",
-      "description": "Override the guard threshold for the seven_day window only. Leave blank to use the global threshold."
+      "description": "Override the guard threshold for the seven_day window only. Leave blank to use the global threshold.",
+      "min": 1,
+      "max": 100
     },
     "watch": {
       "type": "string",
@@ -48,24 +59,41 @@
       "type": "string",
       "title": "Label style",
       "description": "How limit window labels appear in the status line: full (e.g. 'Limit session:') or short (e.g. '5h').",
+      "options": [
+        "full",
+        "short"
+      ],
       "default": "full"
     },
     "reset_display": {
       "type": "string",
       "title": "Reset countdown display",
       "description": "How the reset time appears: clock (e.g. '→ 06:00'), relative (e.g. '→ in 2h13m'), or both (e.g. '→ 06:00 (in 2h13m)').",
+      "options": [
+        "clock",
+        "relative",
+        "both"
+      ],
       "default": "clock"
     },
     "projection_display": {
       "type": "string",
       "title": "Burn-rate projection",
       "description": "Show a projected time-to-threshold segment (e.g. '📈 ~1h40m to 90%') based on recent usage trend: off or on (default off).",
+      "options": [
+        "off",
+        "on"
+      ],
       "default": "off"
     },
     "layout": {
       "type": "string",
       "title": "Status line layout",
       "description": "compact (model, context bar, limit windows, project paths) or classic (the v0.12 limits-only line). Default compact.",
+      "options": [
+        "compact",
+        "classic"
+      ],
       "default": "compact"
     },
     "show_model": {
@@ -90,18 +118,39 @@
       "type": "string",
       "title": "Context bar style",
       "description": "Glyphs of the context bar: pill, block, shade, square, dot, rect, line, braille or smooth. Default pill (falls back to block in terminals without the glyphs).",
+      "options": [
+        "pill",
+        "block",
+        "shade",
+        "square",
+        "dot",
+        "rect",
+        "line",
+        "braille",
+        "smooth"
+      ],
       "default": "pill"
     },
     "background": {
       "type": "string",
       "title": "Status line background",
       "description": "off, bar (whole line on a dark bar), tiles (every segment its own background) or warn (amber/red tile behind a limit that is in the warning band, red context). Default warn. No colors under NO_COLOR.",
+      "options": [
+        "off",
+        "bar",
+        "tiles",
+        "warn"
+      ],
       "default": "warn"
     },
     "window_display": {
       "type": "string",
       "title": "Window display",
       "description": "all (every watched window) or nearest (only the window closest to its threshold). Default all.",
+      "options": [
+        "all",
+        "nearest"
+      ],
       "default": "all"
     },
     "show_paths": {
@@ -120,7 +169,17 @@
       "type": "string",
       "title": "Desktop notifications",
       "description": "Pop up an OS notification once when a window enters the warn band or crosses the threshold: off or on (default off).",
+      "options": [
+        "off",
+        "on"
+      ],
       "default": "off"
+    },
+    "allow_project_actions": {
+      "type": "boolean",
+      "title": "Allow project-file actions",
+      "description": "Let a project's .claude/limit-guard.json set guardAction, warnAction and handoff, and keep the built-in pointer to .claude/limit-guard.md. Off by default: a cloned repo could otherwise steer the assistant. Action text is capped at 500 characters.",
+      "default": false
     }
   }
 }

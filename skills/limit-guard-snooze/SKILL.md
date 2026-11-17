@@ -12,13 +12,13 @@ when they knowingly want to keep working close to the limit without the guard nu
 - If `$ARGUMENTS` is empty or `set`, snooze until the next reset:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/snooze.mjs" --action set
+node "${CLAUDE_PLUGIN_ROOT}/scripts/snooze.mjs" --action set
 ```
 
 - If `$ARGUMENTS` is `clear`, cancel an active snooze:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/snooze.mjs" --action clear
+node "${CLAUDE_PLUGIN_ROOT}/scripts/snooze.mjs" --action clear
 ```
 
 Report the command output to the user. Explain in plain words in the user's language that while snoozed, the status line and

@@ -8,7 +8,7 @@ Reply in the user's language (the language they write in); translate any option 
 Run the stats command and show its output to the user:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/stats.mjs"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/stats.mjs"
 ```
 
 The command summarizes the rolling ~7-day usage log: how many readings were recorded, the peak

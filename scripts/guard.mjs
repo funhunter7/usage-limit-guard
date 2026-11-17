@@ -9,14 +9,15 @@ import {
   setGlobalWarn,
   clearGlobalWarn,
   readValueFromStdin,
+  projectActionNote,
 } from '../lib/guardConfig.mjs';
 
 // Usage:
-//   node bin/guard.mjs --scope project|global --action set --value "<text>"
-//   node bin/guard.mjs --scope project|global --action set --value-stdin <<'EOF' ... EOF   (free text, no shell quoting)
-//   node bin/guard.mjs --scope project|global --action clear
-//   node bin/guard.mjs --scope project|global --action set --value "<text>" --kind warn
-//   node bin/guard.mjs --scope project|global --action clear --kind warn
+//   node scripts/guard.mjs --scope project|global --action set --value "<text>"
+//   node scripts/guard.mjs --scope project|global --action set --value-stdin <<'EOF' ... EOF   (free text, no shell quoting)
+//   node scripts/guard.mjs --scope project|global --action clear
+//   node scripts/guard.mjs --scope project|global --action set --value "<text>" --kind warn
+//   node scripts/guard.mjs --scope project|global --action clear --kind warn
 // --kind defaults to 'guard' for full back-compat.
 function parseArgs(argv) {
   const out = {};
@@ -47,14 +48,14 @@ function main() {
     } else {
       path = action === 'set' ? setGlobalWarn(value) : clearGlobalWarn();
     }
-    process.stdout.write(`OK: ${action} ${scope} warn action -> ${path}\n`);
+    process.stdout.write(`OK: ${action} ${scope} warn action -> ${path}\n` + (scope === 'project' && action === 'set' ? projectActionNote(process.cwd()) : ''));
   } else {
     if (scope === 'project') {
       path = action === 'set' ? setProjectGuard(process.cwd(), value) : clearProjectGuard(process.cwd());
     } else {
       path = action === 'set' ? setGlobalGuard(value) : clearGlobalGuard();
     }
-    process.stdout.write(`OK: ${action} ${scope} guard action -> ${path}\n`);
+    process.stdout.write(`OK: ${action} ${scope} guard action -> ${path}\n` + (scope === 'project' && action === 'set' ? projectActionNote(process.cwd()) : ''));
   }
 }
 

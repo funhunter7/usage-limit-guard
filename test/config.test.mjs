@@ -11,7 +11,7 @@ test('loadConfig: returns defaults when file missing', () => {
 
 test('loadConfig: merges project overrides over defaults', () => {
   const readFile = () => JSON.stringify({ threshold: 90, handoff: 'NOTES.md' });
-  const cfg = loadConfig('/proj', readFile, noEnv);
+  const cfg = loadConfig('/proj', readFile, { CLAUDE_PLUGIN_OPTION_ALLOW_PROJECT_ACTIONS: 'true' });
   assert.equal(cfg.threshold, 90);
   assert.equal(cfg.handoff, 'NOTES.md');
   assert.deepEqual(cfg.watch, DEFAULT_CONFIG.watch);

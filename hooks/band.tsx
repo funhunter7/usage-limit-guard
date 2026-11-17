@@ -2,7 +2,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 // Band mod (Claude Code 2.1.287+): one button above the prompt that toggles the legend, a static
 // explanation block drawn under it (the status line stays one row). The flag file is the one
-// lib/legendFlag.mjs reads (bin/status.mjs) and `/limit-guard-legend on|off` writes. A mod cannot
+// lib/legendFlag.mjs reads (scripts/status.mjs) and `/limit-guard-legend on|off` writes. A mod cannot
 // import Node modules, so the path and the locale are worked out again here.
 
 // Windows sets USERPROFILE, not HOME.

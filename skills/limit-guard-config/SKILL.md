@@ -38,7 +38,7 @@ Steps:
 4. Run, substituting `<scope>` (global|project), `<option>` (the option name from step 1),
    and `<value>`:
    ```
-   node "${CLAUDE_PLUGIN_ROOT}/bin/config.mjs" --scope <scope> --option <option> --value-stdin <<'LG_EOF'
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/config.mjs" --scope <scope> --option <option> --value-stdin <<'LG_EOF'
    <value>
    LG_EOF
    ```
@@ -52,5 +52,5 @@ Steps:
 5. Report the helper's output to the user and remind them of the precedence:
    **per-project file > /config option (global) > built-in default**.
 
-Never edit the JSON files by hand — always go through `bin/config.mjs` so writes are
+Never edit the JSON files by hand — always go through `scripts/config.mjs` so writes are
 validated and other keys are preserved.

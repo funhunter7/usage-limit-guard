@@ -46,6 +46,8 @@ export function renderStatus(cfg, health) {
     `  locale: ${cfg.locale ?? '-'}`,
     `  guardAction: ${cfg.guardAction ? JSON.stringify(cfg.guardAction) : `(${m.statusGuardActionDefault})`}`,
     `  warnAction: ${cfg.warnAction ? JSON.stringify(cfg.warnAction) : `(${m.statusGuardActionDefault})`}`,
+    `  allowProjectActions: ${cfg.allowProjectActions ?? false}`,
+    ...(cfg.projectActionsIgnored?.length ? [`  ignored from .claude/limit-guard.json (allow_project_actions is off): ${cfg.projectActionsIgnored.join(', ')}`] : []),
   ];
 
   // --- health section ---

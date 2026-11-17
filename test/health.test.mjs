@@ -9,7 +9,7 @@ test('probeTokenPresent: true when getToken returns non-null, false on null/thro
 });
 
 test('probeStatusLineWired: true when command references usage.mjs', () => {
-  const wired = () => JSON.stringify({ statusLine: { command: 'node "/p/bin/usage.mjs" --statusline' } });
+  const wired = () => JSON.stringify({ statusLine: { command: 'node "/p/scripts/usage.mjs" --statusline' } });
   assert.equal(probeStatusLineWired({}, wired, () => true), true);
   const other = () => JSON.stringify({ statusLine: { command: 'something-else' } });
   assert.equal(probeStatusLineWired({}, other), false);
@@ -17,16 +17,16 @@ test('probeStatusLineWired: true when command references usage.mjs', () => {
 });
 
 test('probeStatusLineWired: false when the wired usage.mjs no longer exists (stale cache dir)', () => {
-  const quoted = () => JSON.stringify({ statusLine: { command: 'node "/p/0.12.0/bin/usage.mjs" --statusline' } });
+  const quoted = () => JSON.stringify({ statusLine: { command: 'node "/p/0.12.0/scripts/usage.mjs" --statusline' } });
   const seen = [];
   assert.equal(probeStatusLineWired({}, quoted, (p) => { seen.push(p); return false; }), false);
-  assert.deepEqual(seen, ['/p/0.12.0/bin/usage.mjs']);
-  const bare = () => JSON.stringify({ statusLine: { command: 'node /q/bin/usage.mjs --statusline' } });
-  assert.equal(probeStatusLineWired({}, bare, (p) => p === '/q/bin/usage.mjs'), true);
+  assert.deepEqual(seen, ['/p/0.12.0/scripts/usage.mjs']);
+  const bare = () => JSON.stringify({ statusLine: { command: 'node /q/scripts/usage.mjs --statusline' } });
+  assert.equal(probeStatusLineWired({}, bare, (p) => p === '/q/scripts/usage.mjs'), true);
 });
 
 test('probeStatusLineWired: tolerates a UTF-8 BOM in settings.json', () => {
-  const bom = () => '\uFEFF' + JSON.stringify({ statusLine: { command: 'node "/p/bin/usage.mjs"' } });
+  const bom = () => '\uFEFF' + JSON.stringify({ statusLine: { command: 'node "/p/scripts/usage.mjs"' } });
   assert.equal(probeStatusLineWired({}, bom, () => true), true);
 });
 
@@ -46,4 +46,9 @@ test('probeLinksHidden: only in Windows Terminal without FORCE_HYPERLINK=1 (env 
   // an explicit FORCE_HYPERLINK=0 (env or settings.json) is a deliberate opt-out, not "hidden"
   assert.equal(probeLinksHidden({ WT_SESSION: 'x', FORCE_HYPERLINK: '0' }, settings({})), false);
   assert.equal(probeLinksHidden({ WT_SESSION: 'x' }, settings({ env: { FORCE_HYPERLINK: '0' } })), false);
+});
+
+test('probeStatusLineWired: the pre-0.15 bin/usage.mjs layout counts as not wired even when it exists', () => {
+  const legacy = () => JSON.stringify({ statusLine: { command: 'node "/p/bin/usage.mjs" --statusline' } });
+  assert.equal(probeStatusLineWired({}, legacy, () => true), false);
 });

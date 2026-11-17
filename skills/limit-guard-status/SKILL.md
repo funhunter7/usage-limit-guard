@@ -8,7 +8,7 @@ Reply in the user's language (the language they write in); translate any option 
 Run the diagnostic command and show its output to the user:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/status.mjs"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/status.mjs"
 ```
 
 The command prints the resolved configuration (threshold, watch windows, label style, etc.) and a

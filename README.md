@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/funhunter7/usage-limit-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/funhunter7/usage-limit-guard/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.14.0-brightgreen)
+![Version](https://img.shields.io/badge/version-0.15.0-brightgreen)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Windows%20·%20macOS%20·%20Linux-lightgrey)
 
@@ -89,13 +89,13 @@ The status line is a user setting, so add it to `~/.claude/settings.json` yourse
 {
   "statusLine": {
     "type": "command",
-    "command": "node \"%LOCALAPPDATA%\\path\\to\\usage-limit-guard\\bin\\usage.mjs\" --statusline",
+    "command": "node \"%LOCALAPPDATA%\\path\\to\\usage-limit-guard\\scripts\\usage.mjs\" --statusline",
     "refreshInterval": 60
   }
 }
 ```
 
-Use the absolute path to `bin/usage.mjs`. On macOS/Linux use a normal POSIX path.
+Use the absolute path to `scripts/usage.mjs`. (`/limit-guard-setup` does this for you; a wiring that still points at the pre-0.15 `bin/` folder is re-pointed on the next session start.) On macOS/Linux use a normal POSIX path.
 
 `refreshInterval` re-runs the status line on a timer (in addition to Claude Code's
 event-driven updates) so the value stays current while the session is idle — in particular it
@@ -158,6 +158,7 @@ Settings you can change **directly in Claude Code** via `/config` (under this pl
 | `scratch_dir` | string | `""` | Folder for the scratch segment (relative to the project). Empty = Claude Code's built-in scratchpad. |
 | `background` | enum | `warn` | Compact status line backgrounds: `off`, `bar` (whole line on a dark bar, padded to `COLUMNS` when set), `tiles` (every segment its own background, no separators) or `warn` (a limit in the amber or red band gets a black-on-amber / white-on-red tile; context only when red, ≥80 %). 16-color equivalents in the basic and ascii tiers; none under `NO_COLOR`; classic layout unaffected. |
 | `bar_style` | enum | `pill` | Context bar glyphs: `pill`, `block`, `shade`, `square`, `dot`, `rect`, `line`, `braille` or `smooth`. Falls back to `block` in terminals without the glyphs. |
+| `allow_project_actions` | bool | `false` | Let a project's `.claude/limit-guard.json` set `guardAction`, `warnAction` and `handoff` (shown with a `(from project file …)` prefix) and keep the built-in pointer to `.claude/limit-guard.md`. Off by default so a cloned repo cannot steer Claude; set it at user level only (a project file cannot enable it). |
 | `notifications` | enum | `off` | When `on`, pops up an OS notification once when a window enters the warn band or crosses the threshold (macOS/Linux/Windows, best-effort). |
 
 ### Auto-detected (not in the `/config` dialog)
@@ -195,6 +196,12 @@ These follow your environment, so `/config` doesn't prompt for them. Override on
 Drop `.claude/limit-guard.json` and `.claude/limit-guard.md` (copy from `templates/`; `limit-guard.md` is
 English, `limit-guard.cs.md` the Czech version) into a project to override these settings for that
 project only. The project root is used (not a subfolder Claude has `cd`'d into).
+
+> **Project-file actions are ignored by default.** `guardAction`, `warnAction` and `handoff` from
+> `.claude/limit-guard.json` (and the built-in "follow `.claude/limit-guard.md`" pointer) only take effect when you
+> enable the user-level `allow_project_actions` option; the text is then prefixed with
+> `(from project file .claude/limit-guard.json)`. Any action text, from any source, is capped at 500 characters.
+> Other project keys (thresholds, display) are unaffected.
 
 ### Precedence (most specific wins)
 
@@ -292,6 +299,24 @@ Once a watched window's reset time passes, the native `rate_limits` (and the war
 populated from them) are stale until Claude Code makes its next API response, so the status
 line stops trusting them and re-queries the OAuth endpoint for the fresh post-reset value —
 guaranteeing the displayed number is correct the moment the script next runs after a reset.
+
+### Where state lives
+
+Short-lived state (usage cache, burn-rate history, notification and Stop markers, snooze, scratch-folder cache) is kept
+in the plugin data folder `~/.claude/plugins/data/usage-limit-guard-usage-limit-guard/` (`CLAUDE_PLUGIN_DATA` in hooks; the
+status line and scripts compute the same folder and honor `CLAUDE_CONFIG_DIR`), not in the shared OS temp dir. The
+long-lived usage log stays at `~/.claude/claude-limit-guard-usage.jsonl`.
+
+### Undocumented usage endpoint (fallback risk)
+
+The OAuth fallback calls `GET https://api.anthropic.com/api/oauth/usage`. That endpoint is **not part of any documented,
+supported API**: it is the one `/usage` appears to use, and the plugin sends a Claude-Code-style `User-Agent`
+(`claude-code/<version>`) so it is accepted. Anthropic can change, rate-limit or block it, or reject that User-Agent, at any
+time. The plugin then shows `🔑 sign in` or the last cached value and keeps working from the native `rate_limits` data.
+The OAuth token is sent only to `api.anthropic.com` and is never logged. The per-model windows (`seven_day_opus`,
+`seven_day_sonnet`) are undocumented too; the documented native `rate_limits` lists only `five_hour`, `seven_day` and
+`spend_limit` (the last one is not supported). Prefer the native data: it needs no network call and no token. Set
+`CLAUDE_LIMIT_GUARD_CC_VERSION` if a pinned User-Agent version is ever rejected.
 
 ## Troubleshooting
 

@@ -9,7 +9,7 @@ The user wants the plugin to wire its status line into the global settings autom
 editing `~/.claude/settings.json` by hand. Run:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/setup.mjs" "${CLAUDE_PLUGIN_ROOT}"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup.mjs" "${CLAUDE_PLUGIN_ROOT}"
 ```
 
 This sets `statusLine` in `~/.claude/settings.json` to run this plugin from the marketplace clone
@@ -28,7 +28,7 @@ is reversible.
 After wiring, check whether to offer clickable links:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/setup.mjs" --check-hyperlink
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup.mjs" --check-hyperlink
 ```
 
 If it prints `skip`, say nothing more (`WT_SESSION` not set, i.e. not Windows Terminal, or `FORCE_HYPERLINK` is already `1`, or the
@@ -38,7 +38,7 @@ links. Explain that Claude Code hides terminal links in Windows Terminal unless 
 is set, that enabling it lets the project, worktree and scratch folders in the status line open on click, and that it applies to all links Claude Code prints (not only this plugin's). On "yes" run:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/setup.mjs" "${CLAUDE_PLUGIN_ROOT}" --force-hyperlink
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup.mjs" "${CLAUDE_PLUGIN_ROOT}" --force-hyperlink
 ```
 
 It sets `env.FORCE_HYPERLINK` to `"1"` in `~/.claude/settings.json` (with the same backup, idempotent).

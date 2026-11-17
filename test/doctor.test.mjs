@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderDoctor, isNewerVersion } from '../bin/doctor.mjs';
+import { renderDoctor, isNewerVersion } from '../scripts/doctor.mjs';
 
 test('renderDoctor: ok checks show check mark, bad checks show cross + hint', () => {
   const out = renderDoctor([

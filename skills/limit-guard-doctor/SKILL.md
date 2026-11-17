@@ -8,7 +8,7 @@ Reply in the user's language (the language they write in); translate any option 
 Run the self-check and show its output to the user:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/bin/doctor.mjs"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.mjs"
 ```
 
 The command prints a localized report with one line per check: Node version (≥ 18), whether the OAuth

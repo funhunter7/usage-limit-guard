@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderStats } from '../bin/stats.mjs';
+import { renderStats } from '../scripts/stats.mjs';
 
 test('renderStats: shows readings, peaks and resets (en)', () => {
   const out = renderStats({ count: 10, peakFiveHour: 90, peakSevenDay: 42, resets: 1, sinceMs: 1 }, { locale: 'en-US' });

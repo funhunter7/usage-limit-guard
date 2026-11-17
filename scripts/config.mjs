@@ -6,11 +6,12 @@ import {
   setGlobalOption,
   clearGlobalOption,
   readValueFromStdin,
+  projectActionNote,
 } from '../lib/guardConfig.mjs';
 
 // Usage:
-//   node bin/config.mjs --scope project|global --option <name> --value "<v>"
-//   node bin/config.mjs --scope project|global --option <name> --clear
+//   node scripts/config.mjs --scope project|global --option <name> --value "<v>"
+//   node scripts/config.mjs --scope project|global --option <name> --clear
 // <name> is one of CONFIG_OPTIONS (threshold, warn_band, watch, time_format, style).
 // For list options (watch) pass a comma-separated --value. Powers /limit-guard-config.
 function parseArgs(argv) {
@@ -48,6 +49,7 @@ function main() {
     ? setProjectOption(process.cwd(), def.projectKey, coerced)
     : setGlobalOption(def.globalKey, coerced);
   process.stdout.write(`OK: set ${scope} ${option} = ${JSON.stringify(coerced)} -> ${path}\n`);
+  if (scope === 'project' && (option === 'guard_action' || option === 'warn_action')) process.stdout.write(projectActionNote(process.cwd()));
 }
 
 try {

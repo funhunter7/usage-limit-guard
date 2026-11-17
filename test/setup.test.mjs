@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, normalize } from 'node:path';
-import { computeForceHyperlink, computeSettings, runSetup, stablePluginRoot } from '../bin/setup.mjs';
+import { computeForceHyperlink, computeSettings, runSetup, stablePluginRoot } from '../scripts/setup.mjs';
 import { getMessages } from '../lib/messages.mjs';
 
-const CMD = 'node "/root/bin/usage.mjs" --statusline';
+const CMD = 'node "/root/scripts/usage.mjs" --statusline';
 
 test('computeSettings: adds statusLine with refreshInterval when absent', () => {
   const { settings, changed } = computeSettings({}, CMD);
@@ -163,6 +163,6 @@ test('runSetup: wires the marketplace clone instead of the versioned cache dir',
     const settingsPath = join(d, 'settings.json');
     runSetup({ pluginRoot: '/h/.claude/plugins/cache/mk/pl/0.13.0', settingsPath, m: en, exists: () => true });
     const cmd = JSON.parse(readFileSync(settingsPath, 'utf8')).statusLine.command;
-    assert.equal(cmd, `node "${join(normalize('/h/.claude/plugins/marketplaces/mk'), 'bin', 'usage.mjs')}" --statusline`);
+    assert.equal(cmd, `node "${join(normalize('/h/.claude/plugins/marketplaces/mk'), 'scripts', 'usage.mjs')}" --statusline`);
   } finally { rmSync(d, { recursive: true, force: true }); }
 });

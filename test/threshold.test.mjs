@@ -106,7 +106,7 @@ test('breachedLimits: override on a non-watched window is ignored', () => {
 
 test('breachedLimits: per-window threshold 80; five_hour 85% is BREACHED (no warn on top)', () => {
   // Documents the warn/breach precedence: once breached via per-window threshold,
-  // bin/usage.mjs skips the warn branch (breached.length > 0) so there's no double notice.
+  // scripts/usage.mjs skips the warn branch (breached.length > 0) so there's no double notice.
   const u = { five_hour: { utilization: 85 }, seven_day: { utilization: 30 } };
   const breached = breachedLimits(u, 90, ['five_hour', 'seven_day'], { five_hour: 80 });
   assert.deepEqual(breached, ['five_hour']); // five_hour is breached via per-window override

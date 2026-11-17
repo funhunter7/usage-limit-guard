@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runCli, parseCwd, parseFields, parseStdin } from '../bin/usage.mjs';
+import { runCli, parseCwd, parseFields, parseStdin } from '../scripts/usage.mjs';
 
 test('parseCwd: workspace.current_dir wins over cwd', () => {
   const raw = JSON.stringify({ workspace: { current_dir: '/ws' }, cwd: '/other' });

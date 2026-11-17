@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { repairStatusLine } from '../lib/statusLine.mjs';
 import { loadConfig as defaultLoadConfig } from '../lib/config.mjs';
 import { getUsage as defaultGetUsage, CACHE_PATH } from '../lib/usage.mjs';
 import { writeCache as defaultWriteCache } from '../lib/cache.mjs';
@@ -12,7 +14,7 @@ import { makeDebug } from '../lib/debug.mjs';
 import { resolveWatch, watchBase } from '../lib/watch.mjs';
 import { formatStatusLine, resolveHour12, resolveStyle, resolveTier, resolveLocale } from '../lib/format.mjs';
 import { breachedLimits, warnedLimits } from '../lib/threshold.mjs';
-import { getMessages } from '../lib/messages.mjs';
+import { getMessages, withoutProjectMdHint } from '../lib/messages.mjs';
 import { shouldBlockStop as defaultShouldBlockStop } from '../lib/stopGuard.mjs';
 import { notify as defaultNotify } from '../lib/notify.mjs';
 import { shouldNotify as defaultShouldNotify } from '../lib/notifyGuard.mjs';
@@ -58,6 +60,8 @@ export async function runCli(mode, cwd, deps = {}) {
   const m = getMessages(locale);
   // Only --resume-check and --stop care whether a handoff already exists; compute lazily
   // so the per-keystroke --statusline/--context paths skip the filesystem stat.
+  // Default routines point at .claude/limit-guard.md; only keep that when the user trusts project files.
+  const dflt = (s) => (cfg.allowProjectActions === true ? s : withoutProjectMdHint(s));
   const hoExists = () => (handoffExists ? handoffExists() : existsSync(join(cwd, cfg.handoff)));
 
   if (mode === '--resume-check') {
@@ -196,7 +200,7 @@ export async function runCli(mode, cwd, deps = {}) {
     let ctx = m.contextLabel(line, cfg.threshold);
     if (!snoozed) {
       if (breached.length) {
-        const action = cfg.guardAction || m.contextAction(cfg.handoff);
+        const action = cfg.guardAction || dflt(m.contextAction(cfg.handoff));
         ctx += ' ' + m.breach(breached.join(', '), action);
       } else {
         // Pass the same per-window overrides so the warn band's upper bound matches each
@@ -222,7 +226,7 @@ export async function runCli(mode, cwd, deps = {}) {
       // suppress the guard in another that breaches in the same reset window.
       const windowKey = `${cwd}|${sessionId}|${usage[breached[0]]?.resets_at || ''}`;
       if (!shouldBlockStop(windowKey)) return '{}';
-      const action = cfg.guardAction || m.stopAction(cfg.handoff);
+      const action = cfg.guardAction || dflt(m.stopAction(cfg.handoff));
       return JSON.stringify({
         decision: 'block',
         reason: m.stopReason(cfg.threshold, breached.join(', '), action),
@@ -280,6 +284,8 @@ function readStdin() {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const mode = process.argv[2] || '--statusline';
+  // SessionStart: re-point a stale status-line wiring (deleted cache dir / pre-0.15 bin/ layout) at this install.
+  if (mode === '--resume-check') repairStatusLine({ pluginRoot: dirname(dirname(fileURLToPath(import.meta.url))) });
   const { cwd, rateLimits, payload, sessionId, stopHookActive } = readStdin();
   const stdinUsage = usageFromRateLimits(rateLimits);
   runCli(mode, cwd, { stdinUsage, payload, sessionId, stopHookActive })

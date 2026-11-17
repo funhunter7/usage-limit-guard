@@ -1,7 +1,7 @@
 import js from '@eslint/js';
 import globals from 'globals';
 
-// Flat config (ESLint 9). Lints the plain ESM sources in lib/, bin/, and test/ with the
+// Flat config (ESLint 9). Lints the plain ESM sources in lib/, scripts/, and test/ with the
 // recommended rule set on top of node --check / node --test. Node + ES globals only.
 export default [
   { ignores: ['node_modules/**'] },

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderStatus } from '../bin/status.mjs';
+import { renderStatus } from '../scripts/status.mjs';
 
 // --- basic config + health display ---
 

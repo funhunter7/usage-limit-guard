@@ -4,18 +4,21 @@
 // --force-hyperlink instead sets env.FORCE_HYPERLINK=1 (clickable links in Windows Terminal;
 // an explicit "0" is left alone). --check-hyperlink prints `ask` or `skip`: whether to offer it.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, normalize } from 'node:path';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { loadConfig } from '../lib/config.mjs';
 import { resolveLocale } from '../lib/format.mjs';
 import { getMessages } from '../lib/messages.mjs';
 import { probeLinksHidden } from '../lib/health.mjs';
 import { globalSettingsPath } from '../lib/pluginSettings.mjs';
+import { stablePluginRoot } from '../lib/statusLine.mjs';
+
+export { stablePluginRoot };
 
 // Re-run the status line on a fixed timer (seconds) on top of Claude Code's event-driven
 // updates. This keeps the value current while the session is idle — notably so it refreshes
 // itself shortly after a limit reset, which event-only updates would miss. The matching
-// staleness check in bin/usage.mjs makes these idle re-runs cheap (no network until a reset
+// staleness check in scripts/usage.mjs makes these idle re-runs cheap (no network until a reset
 // actually passes). See docs/superpowers/specs/2026-06-13-stale-after-reset-design.md.
 export const REFRESH_INTERVAL_SECONDS = 60;
 
@@ -30,18 +33,6 @@ export function computeSettings(existing, command, refreshInterval = REFRESH_INT
   return { settings: { ...existing, statusLine: { type: 'command', command, refreshInterval } }, changed: true };
 }
 
-// CLAUDE_PLUGIN_ROOT is the versioned cache dir (plugins/cache/<marketplace>/<plugin>/<version>).
-// Claude Code deletes an old version dir 14 days after an update
-// (https://code.claude.com/docs/en/plugins/loading.md), which would silently drop the status line.
-// The marketplace clone (plugins/marketplaces/<marketplace>) survives updates, so wire that when it
-// holds this plugin; otherwise keep the given root. Trade-off: it tracks the auto-updated marketplace
-// HEAD, which can be ahead of the installed hook version.
-export function stablePluginRoot(pluginRoot, exists = existsSync) {
-  const m = /^(.*[\\/]plugins)[\\/]cache[\\/]([^\\/]+)[\\/][^\\/]+[\\/][^\\/]+[\\/]?$/.exec(pluginRoot);
-  if (!m) return pluginRoot;
-  const clone = normalize(`${m[1]}/marketplaces/${m[2]}`);
-  return exists(join(clone, 'bin', 'usage.mjs')) ? clone : pluginRoot;
-}
 
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
@@ -71,7 +62,7 @@ export function runSetup({ pluginRoot, settingsPath, forceHyperlink = false, m, 
     if (!isPlainObject(existing)) throw new Error(`${settingsPath} is not a JSON object; nothing was changed`);
   }
 
-  const command = `node "${join(stablePluginRoot(pluginRoot, exists), 'bin', 'usage.mjs')}" --statusline`;
+  const command = `node "${join(stablePluginRoot(pluginRoot, exists), 'scripts', 'usage.mjs')}" --statusline`;
   const { settings, changed, optedOut } = forceHyperlink ? computeForceHyperlink(existing) : computeSettings(existing, command);
   if (optedOut) return [m.setupHyperlinkOptOut];
   const done = forceHyperlink ? m.setupHyperlinkSet : m.setupWired;

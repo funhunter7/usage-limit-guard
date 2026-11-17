@@ -26,10 +26,10 @@ Steps:
    - Which scope: **global** or **project**.
 
    Then run one of:
-   - `node "${CLAUDE_PLUGIN_ROOT}/bin/guard.mjs" --scope global  --action clear --kind guard`
-   - `node "${CLAUDE_PLUGIN_ROOT}/bin/guard.mjs" --scope project --action clear --kind guard`
-   - `node "${CLAUDE_PLUGIN_ROOT}/bin/guard.mjs" --scope global  --action clear --kind warn`
-   - `node "${CLAUDE_PLUGIN_ROOT}/bin/guard.mjs" --scope project --action clear --kind warn`
+   - `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard.mjs" --scope global  --action clear --kind guard`
+   - `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard.mjs" --scope project --action clear --kind guard`
+   - `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard.mjs" --scope global  --action clear --kind warn`
+   - `node "${CLAUDE_PLUGIN_ROOT}/scripts/guard.mjs" --scope project --action clear --kind warn`
 
 3. For set operations, ask the user for the action text, then run (Bash), pasting the text
    verbatim between the heredoc lines. The delimiter MUST stay quoted (`'LG_EOF'`): that keeps
@@ -37,7 +37,7 @@ Steps:
    the text on the command line.
 
    ```
-   node "${CLAUDE_PLUGIN_ROOT}/bin/guard.mjs" --scope <scope> --action set --value-stdin --kind <kind> <<'LG_EOF'
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/guard.mjs" --scope <scope> --action set --value-stdin --kind <kind> <<'LG_EOF'
    <text>
    LG_EOF
    ```
@@ -50,5 +50,5 @@ Steps:
 4. Report the helper's output to the user and remind them of the precedence:
    **per-project file > /config option (global) > built-in default**.
 
-Never edit the JSON files by hand — always go through `bin/guard.mjs` so writes are
+Never edit the JSON files by hand — always go through `scripts/guard.mjs` so writes are
 validated and other keys are preserved.
